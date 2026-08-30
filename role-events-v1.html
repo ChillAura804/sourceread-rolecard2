@@ -432,7 +432,7 @@ function schedulePickerLayout(){
   if(pickerResizeTimer)clearTimeout(pickerResizeTimer);
   pickerResizeTimer=setTimeout(function(){pickerResizeTimer=0;syncPickerLayout()},40)
 }
-function openOverlay(){if(loading||!rolesAll.length)return;if(selected){var cur=rolesAll.filter(function(r){return String(r.RoleName||'')===selected.name})[0];if(cur)pickTab=tabOf(cur)}renderTabs();document.getElementById('overlay').classList.add('show');renderPickGrid();syncPickerLayout();requestAnimationFrame(syncPickerLayout)}
+function openOverlay(){if(loading||!rolesAll.length)return;if(selected){var cur=rolesAll.filter(function(r){return String(r.RoleName||'')===selected.name})[0];if(cur)pickTab=tabOf(cur)}var overlay=document.getElementById('overlay');renderTabs();renderPickGrid();overlay.classList.add('show');overlay.style.visibility='hidden';syncPickerLayout();requestAnimationFrame(function(){syncPickerLayout();overlay.style.visibility='visible'})}
 function closeOverlay(){document.getElementById('overlay').classList.remove('show')}
 // ===== 事件时间线（整页）=====
 function eventsShell(name,pos,avatar){
