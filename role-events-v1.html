@@ -17,7 +17,7 @@
 .status{padding:60px 6px;color:var(--sub);font-size:14px;text-align:center;line-height:1.7}
 .event{position:relative;padding:0 0 16px 20px}.event:before{content:"";position:absolute;left:4px;top:22px;bottom:0;width:2px;background:var(--line)}.event:last-child:before{display:none}.event:after{content:"";position:absolute;left:0;top:9px;width:10px;height:10px;border-radius:50%;background:#3478f6}
 .eventCard{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
-.eventTitle{font-size:16px;font-weight:750;line-height:1.5}.eventText{font-size:14px;line-height:1.7;color:var(--sub);margin-top:7px;white-space:pre-wrap}.eventMeta{font-size:12px;color:var(--sub);margin-top:10px}
+.eventTitle{font-size:16px;font-weight:750;line-height:1.5}.eventText{font-size:14px;line-height:1.7;color:var(--sub);margin-top:7px;white-space:pre-wrap}.eventMeta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--sub);margin-top:10px}.eventLikes{color:#3478f6;font-weight:650}
 .more{display:none;width:100%;border:0;border-radius:14px;background:var(--card);border:1px solid var(--line);color:#3478f6;font-size:15px;font-weight:700;padding:14px;margin-top:2px}.more.show{display:block}
 .pickBtn{border:0;background:var(--card);border:1px solid var(--line);color:#3478f6;border-radius:999px;font-size:14px;font-weight:700;padding:8px 14px}.pickBtn:active{opacity:.7}
 .overlay{position:fixed;inset:0;z-index:60;display:none}
@@ -418,7 +418,7 @@ function closeOverlay(){document.getElementById('overlay').classList.remove('sho
 function eventsShell(name,pos,avatar){
   var w=wrap();w.innerHTML='';
   var top=document.createElement('div');top.className='topRow';
-  top.innerHTML=(avatar?'<img class="curAva" src="'+esc(avatar)+'" referrerpolicy="no-referrer">':'<span class="curAva"></span>')+'<span class="curRole"><span class="curName">'+esc(name)+'</span>'+(pos?'<span class="curPos">'+esc(pos)+'</span>':'')+'</span><button class="pickBtn" type="button" id="pickBtn">切换角色</button>';
+  top.innerHTML=(avatar?'<img class="curAva" src="'+esc(avatar)+'" referrerpolicy="no-referrer">':'<span class="curAva"></span>')+'<span class="curRole"><span class="curName">'+esc(name)+'</span><span class="curPos"><span id="curPosText">'+esc(pos||'')+'</span><span id="storyTotal"></span></span></span><button class="pickBtn" type="button" id="pickBtn">切换角色</button>';
   w.appendChild(top);
   var host=document.createElement('div');host.id='events';w.appendChild(host);
   var more=document.createElement('button');more.className='more';more.id='more';more.textContent='加载更多';w.appendChild(more);
@@ -427,9 +427,27 @@ function eventsShell(name,pos,avatar){
 }
 function eventState(s){var h=document.getElementById('events');if(h)h.innerHTML='<div class="status">'+esc(s)+'</div>'}
 async function choose(r,avatar){if(loading)return;var name=String(r.RoleName||''),pos=String(r.Position||''),roundedId=String(r.RoleId||'');loading=true;eventsShell(name,pos,avatar);eventState('载入中…');page=0;end=false;try{var exactId=await resolveExactRoleId(roundedId,name);selected={id:exactId,name:name};loading=false;loadMore()}catch(e){loading=false;selected=null;eventState('角色 ID 校正失败');debug(String(e))}}
-function pickList(d){if(Array.isArray(d))return d;if(!d||typeof d!=='object')return[];var ks=['Items','Stories','StoryList','List','DataList','Records','EventList'];for(var i=0;i<ks.length;i++)if(Array.isArray(d[ks[i]]))return d[ks[i]];for(var k in d)if(Array.isArray(d[k])&&d[k].length&&typeof d[k][0]==='object')return d[k];return[]}
-function field(o,n){for(var i=0;i<n.length;i++)if(o&&o[n[i]]!=null&&o[n[i]]!=='')return o[n[i]];return ''}
-function render(list){var box=document.getElementById('events');if(!box)return;if(!list.length&&page===1){eventState(selected.name+' 暂无大事件记录');return}list.forEach(function(x){var title=field(x,['Title','StoryTitle','ChapterName','EventTitle','Name'])||selected.name+' 的事件',text=field(x,['Content','StoryContent','Description','Desc','Text','Summary']),ch=field(x,['ChapterName','ChapterTitle','ChapterId','ChapterIndex']),el=document.createElement('article');el.className='event';el.innerHTML='<div class="eventCard"><div class="eventTitle">'+esc(title)+'</div>'+(text?'<div class="eventText">'+esc(text)+'</div>':'')+(ch?'<div class="eventMeta">'+esc(ch)+'</div>':'')+'</div>';box.appendChild(el)})}
+function storyList(d){
+  // 实测 storiesdetail 的事件数组固定为 Data.StoryInfoList
+  if(!d||typeof d!=='object')return[];
+  return Array.isArray(d.StoryInfoList)?d.StoryInfoList:[];
+}
+function cleanChapter(s){return String(s||'').replace(/^@/,'')}
+function render(list){
+  var box=document.getElementById('events');if(!box)return;
+  list.forEach(function(x){
+    var title=String(x.Title||'').trim()||cleanChapter(x.ChapterName)||'未命名事件';
+    var text=String(x.Content||'').trim();
+    var chapter=cleanChapter(x.ChapterName);
+    var likes=(x.LikeCount==null?'':String(x.LikeCount));
+    var meta='';
+    if(chapter)meta+='<span>'+esc(chapter)+'</span>';
+    if(likes!=='')meta+='<span class="eventLikes">赞 '+esc(likes)+'</span>';
+    var el=document.createElement('article');el.className='event';
+    el.innerHTML='<div class="eventCard"><div class="eventTitle">'+esc(title)+'</div>'+(text?'<div class="eventText">'+esc(text)+'</div>':'')+(meta?'<div class="eventMeta">'+meta+'</div>':'')+'</div>';
+    box.appendChild(el);
+  });
+}
 async function loadMore(){
   if(loading||end||!selected)return;
   loading=true;page++;
@@ -438,7 +456,10 @@ async function loadMore(){
       t='';
   try{
     t=await httpText(u,mkHeaders(a,ts));
-    var j=JSON.parse(t),d=j.Data||{},ok=Number(j.Result)===0,list=ok?pickList(d):[];
+    var j=JSON.parse(t),d=j.Data||{},list=storyList(d);
+    var total=(d.StoryCount==null?'':String(d.StoryCount));
+    var totalEl=document.getElementById('storyTotal');
+    if(totalEl)totalEl.textContent=total===''?'':' · 共 '+total+' 条';
     var box=document.getElementById('events');
     if(page===1&&box)box.innerHTML='';
     if(!list.length){
@@ -452,7 +473,6 @@ async function loadMore(){
     var m=document.getElementById('more');if(m)m.classList.toggle('show',!end);
   }catch(e){
     if(page===1)eventState('大事件请求失败');
-    debug('精确 roleId='+selected.id+'\nURL='+u+'\n错误='+String(e)+'\n原始返回='+String(t).slice(0,3000));
     page--;
   }
   loading=false;
