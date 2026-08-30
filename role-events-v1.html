@@ -8,7 +8,7 @@
 .head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 16px}.title{font-weight:800;font-size:24px;letter-spacing:-.5px}.hint{font-size:13px;color:var(--sub);margin-top:5px}.close{border:0;background:rgba(52,120,246,.12);color:var(--blue);font-weight:700;font-size:15px;padding:8px 12px;border-radius:999px}
 .roleStrip{display:flex;gap:10px;overflow-x:auto;padding:1px 1px 13px;scrollbar-width:none}.roleStrip::-webkit-scrollbar{display:none}.role{flex:0 0 auto;display:flex;align-items:center;gap:9px;max-width:180px;padding:10px 13px 10px 10px;border-radius:17px;background:var(--card);border:1px solid var(--line);color:var(--text);box-shadow:0 3px 10px rgba(0,0,0,.04)}.role.on{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 10%,var(--card))}.ava{width:35px;height:35px;border-radius:50%;background:#d9e4ff;object-fit:cover}.rname{font-size:15px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rpos{font-size:11px;color:var(--sub);margin-top:3px}
 .state{margin:24px 3px;color:var(--sub);font-size:14px;text-align:center}.event{position:relative;margin-left:11px;padding:0 0 22px 24px;border-left:2px solid var(--line)}.event:before{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:var(--blue);left:-6px;top:6px;box-shadow:0 0 0 4px var(--bg)}.eventCard{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:14px 15px;box-shadow:0 3px 10px rgba(0,0,0,.035)}.eventTitle{font-size:16px;font-weight:750;line-height:1.45}.eventText{font-size:14px;line-height:1.62;color:var(--sub);margin-top:7px;white-space:pre-wrap}.meta{font-size:12px;color:var(--sub);margin-top:10px}.more{display:none;width:100%;border:0;border-radius:15px;background:var(--card);color:var(--blue);font-size:15px;font-weight:700;padding:13px}.more.show{display:block}.debug{display:none;font:12px ui-monospace,monospace;white-space:pre-wrap;color:#d83a3a;margin-top:15px}
-</style></head><body><main class="page"><header class="head"><div><div class="title">角色大事件</div><div id="hint" class="hint">选择角色查看相关剧情事件</div></div><button class="close" onclick="closeUI()">关闭</button></header><div id="roles" class="roleStrip"></div><section id="events"></section><button id="more" class="more">加载更多</button><pre id="debug" class="debug"></pre></main><script>
+</style></head><body><main class="page"><header class="head"><div><div class="title">角色大事件</div><div id="hint" class="hint">选择角色后校正精确 ID，再加载剧情事件</div></div><button class="close" onclick="closeUI()">关闭</button></header><div id="roles" class="roleStrip"></div><section id="events"></section><button id="more" class="more">加载更多</button><pre id="debug" class="debug"></pre></main><script>
 function QDG_utf8Bytes(str) {
     var s = unescape(encodeURIComponent(QDG_text(str)));
     var out = [];
@@ -262,7 +262,47 @@ var $=function(s){return document.querySelector(s)};function esc(s){return Strin
 function closeUI(){try{if(window.SRNative&&SRNative.dismiss)SRNative.dismiss()}catch(e){}}
 function state(s){$('#events').innerHTML='<div class="state">'+esc(s)+'</div>'}function debug(s){var x=$('#debug');x.textContent=s;x.style.display='block'}
 async function loadRoles(){if(!bid){state('未获取到书籍信息');return}state('正在加载角色…');var a=['bookId='+bid,'count=50','page=1'],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/bookrole/getroleinfolist?bookId='+encodeURIComponent(bid)+'&count=50&page=1';var t=await httpText(u,mkHeaders(a,ts));try{t=String(t).replace(/"RoleId"\s*:\s*(\d+)/g,'"RoleId":"$1"');var j=JSON.parse(t),items=(j.Data||{}).Items||[];if(!items.length){state('暂无角色数据');return}var box=$('#roles');box.innerHTML='';items.forEach(function(r){var el=document.createElement('button');el.className='role';el.dataset.id=String(r.RoleId||'');el.dataset.name=String(r.RoleName||'');var im=String(r.RoleHeadIcon||'');if(im.indexOf('//')===0)im='https:'+im;el.innerHTML=(im?'<img class="ava" src="'+esc(im)+'" referrerpolicy="no-referrer">':'<span class="ava"></span>')+'<span><div class="rname">'+esc(r.RoleName)+'</div><div class="rpos">'+esc(r.Position||'')+'</div></span>';el.onclick=function(){choose(this)};box.appendChild(el)});choose(box.firstElementChild)}catch(e){state('角色列表解析失败');debug(String(t).slice(0,2000))}}
-function choose(el){if(!el||loading)return;Array.prototype.forEach.call(document.querySelectorAll('.role'),function(x){x.classList.remove('on')});el.classList.add('on');selected={id:el.dataset.id,name:el.dataset.name};page=0;end=false;$('#events').innerHTML='';$('#more').classList.remove('show');loadMore()}
+function roleIdCandidates(rounded){
+  var out=[];
+  try{
+    var base=BigInt(String(rounded||'').trim()),abs=base<0n?-base:base;
+    var bits=abs.toString(2).length,radius=bits>53?(1n<<BigInt(bits-53)):1n;
+    for(var d=-radius;d<=radius;d++)out.push(String(base+d));
+  }catch(e){out.push(String(rounded||''));}
+  return out;
+}
+async function resolveExactRoleId(roundedId,expectedName){
+  var candidates=roleIdCandidates(roundedId),pending=candidates.length;
+  return await new Promise(function(resolve,reject){
+    if(!pending){reject(new Error('没有RoleId候选'));return;}
+    var settled=false;
+    function failed(){pending--;if(!settled&&pending<=0)reject(new Error('所有RoleId候选均失败'));}
+    candidates.forEach(function(roleId){(async function(){
+      try{
+        var a=['bookId='+bid,'roleId='+roleId],ts=Date.now();
+        var u='https://magev6.if.qidian.com/argus/api/v1/bookrole/v2/getroledetails?bookId='+encodeURIComponent(bid)+'&roleId='+encodeURIComponent(roleId);
+        var t=await httpText(u,mkHeaders(a,ts));
+        if(settled)return;
+        var j=JSON.parse(String(t||'{}')),d=j.Data||{};
+        if(Number(j.Result)!==0||String(d.RoleName||'')!==String(expectedName||'')){failed();return;}
+        if(!settled){settled=true;resolve(roleId);}
+      }catch(e){failed();}
+    })();});
+  });
+}
+async function choose(el){
+  if(!el||loading)return;
+  Array.prototype.forEach.call(document.querySelectorAll('.role'),function(x){x.classList.remove('on')});el.classList.add('on');
+  var roundedId=String(el.dataset.id||''),name=String(el.dataset.name||'');
+  page=0;end=false;$('#events').innerHTML='';$('#more').classList.remove('show');state('正在校正 '+name+' 的角色 ID…');loading=true;
+  try{
+    var exactId=await resolveExactRoleId(roundedId,name);
+    selected={id:exactId,name:name};
+    loading=false;loadMore();
+  }catch(e){
+    loading=false;selected=null;state('角色 ID 校正失败');debug(String(e));
+  }
+}
 function pickList(d){if(Array.isArray(d))return d;if(!d||typeof d!=='object')return[];var ks=['Items','Stories','StoryList','List','DataList','Records','EventList'];for(var i=0;i<ks.length;i++)if(Array.isArray(d[ks[i]]))return d[ks[i]];for(var k in d)if(Array.isArray(d[k])&&d[k].length&&typeof d[k][0]==='object')return d[k];return[]}
 function field(o,n){for(var i=0;i<n.length;i++)if(o&&o[n[i]]!=null&&o[n[i]]!=='')return o[n[i]];return ''}
 function render(list){var box=$('#events');if(!list.length&&page===1){state('该角色暂无大事件');return}list.forEach(function(x){var title=field(x,['Title','StoryTitle','ChapterName','EventTitle','Name'])||selected.name+' 的事件';var text=field(x,['Content','StoryContent','Description','Desc','Text','Summary']);var ch=field(x,['ChapterName','ChapterTitle','ChapterId','ChapterIndex']);var el=document.createElement('article');el.className='event';el.innerHTML='<div class="eventCard"><div class="eventTitle">'+esc(title)+'</div>'+(text?'<div class="eventText">'+esc(text)+'</div>':'')+(ch?'<div class="meta">'+esc(ch)+'</div>':'')+'</div>';box.appendChild(el)})}
