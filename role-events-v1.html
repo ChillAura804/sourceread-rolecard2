@@ -31,7 +31,7 @@
 .tab{border:0;border-radius:999px;background:rgba(127,127,127,.14);color:var(--sub);font-size:13px;font-weight:650;padding:8px 13px}
 .tab.on{background:#3478f6;color:#fff}
 .pickGrid{position:absolute;left:16px;right:16px;top:var(--pick-grid-top,120px);bottom:var(--pick-grid-bottom,58px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(var(--pick-rows,3),60px);align-content:start;gap:10px;overflow:hidden}.roleCard>span:last-child{min-width:0;display:block;overflow:hidden}
-.pageRow{position:absolute;left:16px;right:16px;bottom:8px;height:40px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:2px;z-index:2}
+.pageRow{position:absolute;left:16px;right:16px;bottom:24px;height:40px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:2px;z-index:2}
 .pageBtn{border:0;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:999px;font-size:14px;font-weight:700;padding:8px 14px}
 .pageBtn:disabled{opacity:.38}
 .pageInfo{font-size:13px;color:var(--sub)}
@@ -418,7 +418,7 @@ function syncPickerLayout(){
   if(!panel||!grid||!document.getElementById('overlay').classList.contains('show'))return;
   var panelRect=panel.getBoundingClientRect(),tabs=document.getElementById('tabs'),row=document.getElementById('pageRow');
   var gridTop=(tabs?tabs.getBoundingClientRect().bottom-panelRect.top:120)+10;
-  var rowTop=panelRect.height-48;
+  var rowTop=panelRect.height-64;
   var available=Math.max(0,rowTop-gridTop-10);
   var rows=Math.max(3,Math.min(8,Math.floor((available+10)/70)));
   var next=rows*2;
