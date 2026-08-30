@@ -4,13 +4,13 @@
 <style>
 :root{color-scheme:light dark;--bg:#f5f5f7;--card:rgba(255,255,255,.9);--text:#111827;--sub:#8b8f97;--line:rgba(0,0,0,.06);--mask:rgba(0,0,0,.18);--safeTop:env(safe-area-inset-top,0px);--safeBottom:env(safe-area-inset-bottom,0px);}@media (prefers-color-scheme: dark){:root{--bg:#111217;--card:rgba(28,28,30,.88);--text:#f5f5f7;--sub:#a1a1aa;--line:rgba(255,255,255,.08);--mask:rgba(0,0,0,.42);}}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Helvetica,Arial,sans-serif;height:100%;overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;width:100%;}.page{height:100%;overflow:auto;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding:12px 0 calc(var(--safeBottom) + 22px);}.wrap{max-width:760px;margin:0 auto;padding:0 14px;}.head{position:sticky;top:0;z-index:8;background:var(--bg);padding:calc(var(--safeTop) + 8px) 2px 8px;margin:0 -14px 0;border-radius:22px 22px 0 0;box-shadow:none;border:0;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}.head::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:12px;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,0));}.ttlWrap{text-align:center;line-height:1.1;display:flex;flex-direction:column;align-items:center;justify-content:center;}.ttlMain{font-size:22px;font-weight:700;letter-spacing:.2px;}.ttlSub{font-size:12px;color:var(--sub);margin-top:6px;opacity:.92;}.list{padding:2px 0 0;}.item{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;padding:16px 18px 16px 16px;margin:0 0 12px;background:var(--card);border:1px solid var(--line);border-radius:20px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 4px 14px rgba(0,0,0,.04);}.item + .item{margin-top:0;}.ava{width:56px;height:56px;border-radius:999px;overflow:hidden;flex:0 0 56px;background:rgba(127,127,127,.12);border:1px solid rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;}.ava img{width:100%;height:100%;object-fit:cover;display:block;}.avaPh{width:22px;height:22px;border-radius:999px;background:rgba(127,127,127,.22);}.mid{min-width:0;flex:1 1 auto;padding-right:0;}.line1{display:flex;align-items:baseline;gap:6px;min-width:0;}.name{font-size:17px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}.meta{font-size:12px;color:var(--sub);line-height:1.2;white-space:nowrap;flex:0 0 auto;}.desc{font-size:13px;color:var(--sub);margin-top:7px;line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}.side{flex:0 0 48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:48px;padding-left:0;position:relative;top:3px;}.heart{width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:#a9adb6;line-height:1;font-size:22px;font-weight:400;opacity:.96;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI Symbol","Apple Symbols","PingFang SC",sans-serif;border:0;background:transparent;padding:0;margin:0;appearance:none;-webkit-appearance:none;cursor:pointer;}.heart svg{width:22px;height:22px;display:block;overflow:visible;}.heart svg path{fill:none;stroke:#a9adb6;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}.heart.liked svg path{fill:#ff4d5a;stroke:#ff4d5a;}.likeNum{font-size:11px;line-height:1;color:var(--sub);font-weight:600;white-space:nowrap;letter-spacing:-0.1px;margin-top:1px;}.overlay{position:fixed;inset:0;background:var(--mask);display:none;z-index:999;opacity:0;transition:opacity .18s ease;}.overlay.show{display:block;opacity:1;}.overlay.closing{opacity:0;}.sheet{position:absolute;left:0;right:0;top:0;bottom:0;background:transparent;will-change:transform,opacity;transform:translate3d(0,0,0);transition:transform .18s ease-out,opacity .18s ease-out;}.overlay.closing .sheet{transform:translate3d(calc(100vw + 24px),0,0);opacity:.55;}.topbar{display:none !important;}.back{display:none !important;}.ttl{display:none !important;}.framebox{position:absolute;left:0;right:0;top:0;bottom:0;background:transparent;}.frame{width:100%;height:100%;border:0;background:transparent;}.loading{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:14px;background:var(--bg);}
 .head .backBtn{display:none!important}
-.roleInline{display:none;position:relative;min-height:100%;width:100%;background:transparent;touch-action:pan-y;}.roleInline.show{display:block;}.roleInline .pageShell{position:static!important;min-height:100%!important;overflow:visible!important;touch-action:pan-y!important;}.roleInline .relFrame{touch-action:pan-y!important;} .roleInline .roleLoading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:14px;background:var(--bg);z-index:5;}.roleOverlay.show{display:block;}.roleSheet{position:absolute;inset:0;}.roleFrameBox{position:absolute;inset:0;}.roleFrame{width:100%;height:100%;border:0;background:transparent;}.roleLoading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:14px;background:var(--bg);z-index:1;}
+.roleOverlay{position:fixed;inset:0;display:none;z-index:9999;background:rgba(0,0,0,.24);}.roleOverlay.show{display:block;}.roleSheet{position:absolute;inset:0;}.roleFrameBox{position:absolute;inset:0;}.roleFrame{width:100%;height:100%;border:0;background:transparent;}.roleLoading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:14px;background:var(--bg);z-index:1;}
 </style></head><body>
 <div class="page"><div class="wrap">
 <div class="head"><div class="headInner"><div class="ttlWrap"><div class="ttlMain">角色列表</div><div class="ttlSub" id="sub"></div></div></div></div>
 <div class="list" id="list"></div>
 </div></div>
-<div id="roleInline" class="roleInline"></div>
+<div class="roleOverlay" id="roleOverlay"><div class="roleSheet"><div class="roleFrameBox"><div class="roleLoading" id="roleLoading">正在打开角色卡…</div><iframe class="roleFrame" id="roleFrame" referrerpolicy="no-referrer"></iframe></div></div></div>
 <script>
 var ROLEBG = {
 modern: {
@@ -783,46 +783,15 @@ async function getRoleDetail(bookId,roundedRoleId,expectedName){
   for(var i=0;i<results.length;i++)if(results[i])return results[i];
   throw new Error('所有RoleId候选均失败');
 }
-function roleDataHtml(url){try{return decodeURIComponent(escape(atob(String(url||'').split(',')[1]||'')));}catch(e){return '';}}
-var __roleListHTML='',__roleListScroll=0,__roleStyleNodes=[];
-function roleMount(html){
-  var pageEl=document.querySelector('.page');
-  var root=document.getElementById('roleInline');
-  if(!pageEl||!root)return false;
-  __roleListHTML=pageEl.innerHTML;__roleListScroll=pageEl.scrollTop||0;
-  html=html.replace(/function openRel\(\)\{if\(!relModal\|\|!relationUrl\) return;[\s\S]*?\}function closeRel\(\)\{[\s\S]*?\}if\(relBtn\)\{/,
-    "function openRel(){if(!relationUrl)return;window.location.href=relationUrl;}function closeRel(){try{history.back();}catch(e){}}if(relBtn){");
-  var doc=new DOMParser().parseFromString(html,'text/html');
-  __roleStyleNodes=[];
-  var styles=doc.head?doc.head.querySelectorAll('style'):[];
-  for(var i=0;i<styles.length;i++){var st=document.createElement('style');st.setAttribute('data-sr-role-style','1');st.textContent=styles[i].textContent||'';document.head.appendChild(st);__roleStyleNodes.push(st);}
-  var body=doc.body;root.innerHTML='';
-  if(body){while(body.firstChild)root.appendChild(document.importNode(body.firstChild,true));}
-  pageEl.innerHTML='';pageEl.appendChild(root);root.classList.add('show');
-  // 角色卡内部关系页改为顶层导航；自定义右滑交给系统Sheet。
-  var scripts=root.querySelectorAll('script');
-  for(var j=0;j<scripts.length;j++){
-    var code=scripts[j].textContent||scripts[j].innerHTML||'';
-    code=code.replace(/function openRel\(\)\{[\s\S]*?\}function closeRel\(\)\{[\s\S]*?\}if\(relBtn\)\{/,
-      "function openRel(){if(!relationUrl)return;window.location.href=relationUrl;}function closeRel(){try{history.back();}catch(e){}}if(relBtn){");
-    code=code.replace(/function bindRightSwipeClose\(el,fn\)\{[\s\S]*?\}var navBack=/g,'function bindRightSwipeClose(el,fn){return;}var navBack=');
-    try{window.eval(code);}catch(e){}
-  }
-  pageEl.scrollTop=0;
-  return true;
+function openRoleCard(url){
+  var ov=document.getElementById('roleOverlay'),fr=document.getElementById('roleFrame'),ld=document.getElementById('roleLoading');
+  if(!ov||!fr)return;ov.classList.add('show');if(ld){ld.style.display='flex';ld.textContent='正在打开角色卡…';}
+  fr.onload=function(){if(ld)ld.style.display='none';};fr.src=url;
 }
-function openRoleCard(url){var html=roleDataHtml(url);if(html)roleMount(html);}
-function closeRoleCard(){
-  var pageEl=document.querySelector('.page');var root=document.getElementById('roleInline');
-  for(var i=0;i<__roleStyleNodes.length;i++){try{__roleStyleNodes[i].remove();}catch(e){}}
-  __roleStyleNodes=[];
-  if(pageEl&&__roleListHTML){pageEl.innerHTML=__roleListHTML;pageEl.scrollTop=__roleListScroll;}
-  else if(root){root.classList.remove('show');root.innerHTML='';}
-  __roleListHTML='';
-}
+function closeRoleCard(){var ov=document.getElementById('roleOverlay'),fr=document.getElementById('roleFrame');if(ov)ov.classList.remove('show');if(fr)try{fr.removeAttribute('src');}catch(e){}}
 async function openRoleItem(el){
   var rid=String(el.getAttribute('data-role-id')||'').trim();if(!rid)return;
-  var ld=null;
+  var ld=document.getElementById('roleLoading');if(ld){ld.style.display='flex';ld.textContent='正在打开角色卡…';}
   try{var role=await getRoleDetail(bid,rid,el.getAttribute('data-role-name')||'');openRoleCard('data:text/html;base64,'+roleB64(roleCardHtml(role,bid,'')));}
   catch(e){if(ld)ld.textContent='角色卡加载失败：'+String(e&&e.message||e);}
 }
@@ -832,6 +801,8 @@ document.addEventListener('click',function(ev){
   var item=t&&t.closest?t.closest('.item'):null;
   if(!item)return;ev.preventDefault();openRoleItem(item);
 },false);
+var roleOverlay=document.getElementById('roleOverlay');
+if(roleOverlay)roleOverlay.addEventListener('click',function(ev){if(ev.target===roleOverlay)closeRoleCard();},false);
 window.addEventListener('message',function(ev){if((ev.data||{}).type==='qdroleclose')closeRoleCard();},false);
 
 // ===== 点赞交互:全局事件委托(点击红心变红+数字+1) =====
