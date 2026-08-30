@@ -255,13 +255,38 @@ function QDG_makeIOSQDH(tstamp, ctx) {
 
 
 function getBid(){var c=window.SRContext||{},b=c.book||c||{},u=String(c.bookUrl||b.bookUrl||b.url||c.url||'');var m=u.match(/data:bookId;base64,([A-Za-z0-9+/=]+)/);if(m)try{var s=decodeURIComponent(escape(atob(m[1]))),n=s.match(/(\d{6,})/);if(n)return n[1]}catch(e){}var x=u.match(/(?:book\/|bookId=)(\d+)/)||u.match(/(\d{6,})/);return x?x[1]:''}
-async function httpText(url,headers){try{var r=await SRNative.http(url,headers||null);if(typeof r==='string')return r;if(r&&typeof r==='object'){if(typeof r.body==='string')return r.body;if(typeof r.data==='string')return r.data;if(typeof r.text==='string')return r.text;return JSON.stringify(r)}return String(r||'')}catch(e){return ''}}
+async function httpText(url,headers){
+  var bridge=window.SRNative;
+  if(!bridge||typeof bridge.http!=='function')throw new Error('SRNative.http 未注入；请从源阅用户操作调试入口打开');
+  var r=await bridge.http(url,headers||null);
+  if(typeof r==='string')return r;
+  if(r&&typeof r==='object'){
+    if(typeof r.body==='string')return r.body;
+    if(typeof r.data==='string')return r.data;
+    if(typeof r.text==='string')return r.text;
+    if(typeof r.responseText==='string')return r.responseText;
+  }
+  throw new Error('SRNative.http 返回空文本：'+String(r));
+}
 function mkHeaders(arr,ts){return {'user-agent':'QDReaderAppStore/5.9.463 (iPhone; iOS 15.2; Scale/3.00)',tstamp:String(ts),qdsign:QDG_makeIOSQDSign(arr,ts),qdh:QDG_makeIOSQDH(ts),accept:'application/json'}}
 var bid=getBid(),selected=null,page=0,loading=false,end=false;
 var $=function(s){return document.querySelector(s)};function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function closeUI(){try{if(window.SRNative&&SRNative.dismiss)SRNative.dismiss()}catch(e){}}
 function state(s){$('#events').innerHTML='<div class="state">'+esc(s)+'</div>'}function debug(s){var x=$('#debug');x.textContent=s;x.style.display='block'}
-async function loadRoles(){if(!bid){state('未获取到书籍信息');return}state('正在加载角色…');var a=['bookId='+bid,'count=50','page=1'],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/bookrole/getroleinfolist?bookId='+encodeURIComponent(bid)+'&count=50&page=1';var t=await httpText(u,mkHeaders(a,ts));try{t=String(t).replace(/"RoleId"\s*:\s*(\d+)/g,'"RoleId":"$1"');var j=JSON.parse(t),items=(j.Data||{}).Items||[];if(!items.length){state('暂无角色数据');return}var box=$('#roles');box.innerHTML='';items.forEach(function(r){var el=document.createElement('button');el.className='role';el.dataset.id=String(r.RoleId||'');el.dataset.name=String(r.RoleName||'');var im=String(r.RoleHeadIcon||'');if(im.indexOf('//')===0)im='https:'+im;el.innerHTML=(im?'<img class="ava" src="'+esc(im)+'" referrerpolicy="no-referrer">':'<span class="ava"></span>')+'<span><div class="rname">'+esc(r.RoleName)+'</div><div class="rpos">'+esc(r.Position||'')+'</div></span>';el.onclick=function(){choose(this)};box.appendChild(el)});choose(box.firstElementChild)}catch(e){state('角色列表解析失败');debug(String(t).slice(0,2000))}}
+async function loadRoles(){
+  if(!bid){state('未获取到 bookId；请从书籍详情页或阅读页启动');debug('SRContext='+JSON.stringify(window.SRContext||{}));return}
+  var a=['bookId='+bid,'count=50','page=1'],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/bookrole/getroleinfolist?bookId='+encodeURIComponent(bid)+'&count=50&page=1',t='';
+  state('正在请求角色列表…');
+  try{
+    t=await httpText(u,mkHeaders(a,ts));
+    t=String(t).replace(/"RoleId"\s*:\s*(\d+)/g,'"RoleId":"$1"');
+    var j=JSON.parse(t),items=(j.Data||{}).Items||[];
+    if(!items.length)throw new Error('角色列表为空；Result='+String(j.Result)+' Message='+String(j.Message||''));
+    var box=$('#roles');box.innerHTML='';
+    items.forEach(function(r){var el=document.createElement('button');el.className='role';el.dataset.id=String(r.RoleId||'');el.dataset.name=String(r.RoleName||'');var im=String(r.RoleHeadIcon||'');if(im.indexOf('//')===0)im='https:'+im;el.innerHTML=(im?'<img class="ava" src="'+esc(im)+'" referrerpolicy="no-referrer">':'<span class="ava"></span>')+'<span><div class="rname">'+esc(r.RoleName)+'</div><div class="rpos">'+esc(r.Position||'')+'</div></span>';el.onclick=function(){choose(this)};box.appendChild(el)});
+    choose(box.firstElementChild);
+  }catch(e){state('角色列表请求失败');debug('bookId='+bid+'\nURL='+u+'\n错误='+String(e)+'\n原始返回='+String(t).slice(0,3000));}
+}
 function roleIdCandidates(rounded){
   var out=[];
   try{
@@ -306,6 +331,13 @@ async function choose(el){
 function pickList(d){if(Array.isArray(d))return d;if(!d||typeof d!=='object')return[];var ks=['Items','Stories','StoryList','List','DataList','Records','EventList'];for(var i=0;i<ks.length;i++)if(Array.isArray(d[ks[i]]))return d[ks[i]];for(var k in d)if(Array.isArray(d[k])&&d[k].length&&typeof d[k][0]==='object')return d[k];return[]}
 function field(o,n){for(var i=0;i<n.length;i++)if(o&&o[n[i]]!=null&&o[n[i]]!=='')return o[n[i]];return ''}
 function render(list){var box=$('#events');if(!list.length&&page===1){state('该角色暂无大事件');return}list.forEach(function(x){var title=field(x,['Title','StoryTitle','ChapterName','EventTitle','Name'])||selected.name+' 的事件';var text=field(x,['Content','StoryContent','Description','Desc','Text','Summary']);var ch=field(x,['ChapterName','ChapterTitle','ChapterId','ChapterIndex']);var el=document.createElement('article');el.className='event';el.innerHTML='<div class="eventCard"><div class="eventTitle">'+esc(title)+'</div>'+(text?'<div class="eventText">'+esc(text)+'</div>':'')+(ch?'<div class="meta">'+esc(ch)+'</div>':'')+'</div>';box.appendChild(el)})}
-async function loadMore(){if(loading||end||!selected)return;loading=true;page++;if(page===1)state('正在加载大事件…');var a=['bookId='+bid,'pageIndex='+page,'pageSize=20','roleId='+selected.id],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/bookrole/storiesdetail?bookId='+encodeURIComponent(bid)+'&pageIndex='+page+'&pageSize=20&roleId='+encodeURIComponent(selected.id);var t=await httpText(u,mkHeaders(a,ts));try{var j=JSON.parse(t),d=j.Data||{};if(Number(j.Result)!==0)throw new Error(j.Message||'接口返回失败');var list=pickList(d);if(page===1)$('#events').innerHTML='';render(list);end=list.length<20;$('#more').classList.toggle('show',!end)}catch(e){if(page===1)state('大事件加载失败');debug(String(e)+'\n'+String(t).slice(0,3000));page--}loading=false}
+async function loadMore(){
+  if(loading||end||!selected)return;loading=true;page++;
+  var a=['bookId='+bid,'pageIndex='+page,'pageSize=20','roleId='+selected.id],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/bookrole/storiesdetail?bookId='+encodeURIComponent(bid)+'&pageIndex='+page+'&pageSize=20&roleId='+encodeURIComponent(selected.id),t='';
+  if(page===1)state('正在请求 '+selected.name+' 的大事件…');
+  try{t=await httpText(u,mkHeaders(a,ts));var j=JSON.parse(t),d=j.Data||{};if(Number(j.Result)!==0)throw new Error(j.Message||'接口返回失败');var list=pickList(d);if(page===1)$('#events').innerHTML='';render(list);end=list.length<20;$('#more').classList.toggle('show',!end)}
+  catch(e){if(page===1)state('大事件请求失败');debug('精确 roleId='+selected.id+'\nURL='+u+'\n错误='+String(e)+'\n原始返回='+String(t).slice(0,3000));page--}
+  loading=false;
+}
 $('#more').onclick=loadMore;loadRoles();
 </script></body></html>
