@@ -50,6 +50,13 @@ function md5hex(str){
 }
 
 ;
+function QDG_text(v){ return v == null ? '' : String(v); }
+function QDG_htmlEscape(str){
+    return QDG_text(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function QDG_safeJson(str) {
+    try { return JSON.parse(String(str)); } catch (e) { return null; }
+}
 function QDG_utf8Bytes(str) {
     var s = unescape(encodeURIComponent(QDG_text(str)));
     var out = [];
