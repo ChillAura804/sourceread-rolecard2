@@ -6,7 +6,7 @@
 .wrap{max-width:760px;margin:0 auto;padding:0 16px;}
 .groupTitle{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.3px;margin:18px 2px 9px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.roleCard{min-width:0;display:flex;align-items:center;gap:10px;border:0;border-radius:16px;background:var(--card);color:var(--text);padding:11px;text-align:left;font:inherit;border:1px solid var(--line);}
+.roleCard{min-width:0;min-height:0;display:flex;align-items:center;gap:10px;border:0;border-radius:16px;background:var(--card);color:var(--text);padding:11px;text-align:left;font:inherit;border:1px solid var(--line);overflow:hidden}
 .roleCard:active{opacity:.7}
 .rcAva{width:36px;height:36px;border-radius:50%;flex:0 0 36px;object-fit:cover;background:rgba(127,127,127,.14)}
 .rcName{font-size:15px;font-weight:730;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -23,14 +23,14 @@
 .overlay{position:fixed;inset:0;z-index:60;display:none}
 .overlay.show{display:block}
 .overlayMask{position:absolute;inset:0;background:rgba(0,0,0,.36)}
-.panel{position:absolute;left:0;right:0;bottom:0;background:var(--bg);border-radius:22px 22px 0 0;padding:10px 16px calc(var(--safeBottom) + 16px);display:flex;flex-direction:column;gap:10px}
+.panel{position:absolute;left:0;right:0;bottom:0;height:72vh;max-height:100%;background:var(--bg);border-radius:22px 22px 0 0;padding:10px 16px calc(var(--safeBottom) + 16px);box-sizing:border-box;display:flex;flex-direction:column;gap:10px;overflow:hidden}
 .panelTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .panelTitle{font-size:18px;font-weight:800}
 .panelClose{border:0;background:transparent;color:#3478f6;font-size:15px;font-weight:700;padding:6px 2px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
 .tab{border:0;border-radius:999px;background:rgba(127,127,127,.14);color:var(--sub);font-size:13px;font-weight:650;padding:8px 13px}
 .tab.on{background:#3478f6;color:#fff}
-.pickGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pickGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(var(--pick-rows,3),minmax(0,1fr));gap:10px;flex:1 1 auto;min-height:0}
 .pageRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:2px}
 .pageBtn{border:0;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:999px;font-size:14px;font-weight:700;padding:8px 14px}
 .pageBtn:disabled{opacity:.38}
@@ -379,7 +379,7 @@ function debug(s){var d=document.createElement('pre');d.className='debug';d.styl
 function roleIdCandidates(rounded){var out=[];try{var base=BigInt(String(rounded||'').trim()),abs=base<0n?-base:base,bits=abs.toString(2).length,radius=bits>53?(1n<<BigInt(bits-53)):1n;for(var d=-radius;d<=radius;d++)out.push(String(base+d))}catch(e){out.push(String(rounded||''))}return out}
 async function resolveExactRoleId(roundedId,expectedName){var candidates=roleIdCandidates(roundedId),pending=candidates.length;return await new Promise(function(resolve,reject){if(!pending){reject(new Error('没有RoleId候选'));return}var settled=false;function failed(){pending--;if(!settled&&pending<=0)reject(new Error('所有RoleId候选均失败'))}candidates.forEach(function(roleId){(async function(){try{var a=['bookId='+bid,'roleId='+roleId],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/bookrole/v2/getroledetails?bookId='+encodeURIComponent(bid)+'&roleId='+encodeURIComponent(roleId),t=await httpText(u,mkHeaders(a,ts));if(settled)return;var j=JSON.parse(String(t||'')),d=j.Data||{};if(Number(j.Result)!==0||String(d.RoleName||'')!==String(expectedName||'')){failed();return}if(!settled){settled=true;resolve(roleId)}}catch(e){failed()}})()})})}
 // ===== 选择角色：不滚动的覆盖层（分类 + 分页）=====
-var pickTab='主线',pickPage=0,PICK_PER=6;
+var pickTab='主线',pickPage=0,PICK_PER=6,pickerResizeTimer=0;
 function tabsAvailable(){var order=['主线','男配','女配','其他'],out=[];order.forEach(function(g){var n=rolesAll.filter(function(r){return tabOf(r)===g}).length;if(n)out.push({name:g,count:n})});return out}
 function pickCurrentList(){return rolesAll.filter(function(r){return tabOf(r)===pickTab})}
 function renderTabs(){
@@ -396,6 +396,7 @@ function renderPickGrid(){
   var list=pickCurrentList(),total=Math.max(1,Math.ceil(list.length/PICK_PER));
   if(pickPage>total-1)pickPage=total-1;
   var slice=list.slice(pickPage*PICK_PER,pickPage*PICK_PER+PICK_PER),grid=document.getElementById('pickGrid');
+  grid.style.setProperty('--pick-rows',String(Math.max(1,Math.ceil(slice.length/2))));
   grid.innerHTML='';
   slice.forEach(function(r){
     var el=document.createElement('button');el.className='roleCard';el.type='button';var im=roleAvatar(r);
@@ -412,7 +413,23 @@ function renderPickGrid(){
     row.appendChild(prev);row.appendChild(info);row.appendChild(next);
   }
 }
-function openOverlay(){if(loading||!rolesAll.length)return;if(selected){var cur=rolesAll.filter(function(r){return String(r.RoleName||'')===selected.name})[0];if(cur)pickTab=tabOf(cur)}renderTabs();renderPickGrid();document.getElementById('overlay').classList.add('show')}
+function syncPickerLayout(){
+  var panel=document.querySelector('.panel');if(!panel||!document.getElementById('overlay').classList.contains('show'))return;
+  var top=document.querySelector('.panelTop'),tabs=document.getElementById('tabs'),row=document.getElementById('pageRow');
+  var cs=getComputedStyle(panel),gap=parseFloat(cs.rowGap||cs.gap)||10;
+  var pad=(parseFloat(cs.paddingTop)||0)+(parseFloat(cs.paddingBottom)||0);
+  var fixed=(top?top.offsetHeight:0)+(tabs?tabs.offsetHeight:0)+(row?Math.max(row.offsetHeight,40):40)+pad+(gap*3);
+  var available=Math.max(0,panel.clientHeight-fixed);
+  var rows=Math.max(3,Math.min(8,Math.floor((available+gap)/68)));
+  var next=rows*2;
+  panel.style.setProperty('--pick-rows',String(rows));
+  if(next!==PICK_PER){PICK_PER=next;pickPage=0;renderPickGrid()}
+}
+function schedulePickerLayout(){
+  if(pickerResizeTimer)clearTimeout(pickerResizeTimer);
+  pickerResizeTimer=setTimeout(function(){pickerResizeTimer=0;syncPickerLayout()},40)
+}
+function openOverlay(){if(loading||!rolesAll.length)return;if(selected){var cur=rolesAll.filter(function(r){return String(r.RoleName||'')===selected.name})[0];if(cur)pickTab=tabOf(cur)}renderTabs();document.getElementById('overlay').classList.add('show');renderPickGrid();syncPickerLayout();requestAnimationFrame(syncPickerLayout)}
 function closeOverlay(){document.getElementById('overlay').classList.remove('show')}
 // ===== 事件时间线（整页）=====
 function eventsShell(name,pos,avatar){
@@ -477,7 +494,29 @@ async function loadMore(){
   loading=false;
 }
 
-async function loadRoles(){if(!bid){statusView('未获取到 bookId；请从书籍详情页或阅读页启动');debug('SRContext='+JSON.stringify(window.SRContext||{}));return}statusView('载入中…');var a=['bookId='+bid,'count=50','page=1'],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/bookrole/getroleinfolist?bookId='+encodeURIComponent(bid)+'&count=50&page=1',t='';try{t=await httpText(u,mkHeaders(a,ts));t=String(t).replace(/"RoleId"\s*:\s*(\d+)/g,'"RoleId":"$1"');var j=JSON.parse(t);rolesAll=(j.Data||{}).Items||[];if(!rolesAll.length)throw new Error('角色列表为空；Result='+String(j.Result)+' Message='+String(j.Message||''));var first=rolesAll.filter(function(r){return tabOf(r)==='主线'})[0]||rolesAll[0];choose(first,roleAvatar(first))}catch(e){statusView('角色列表请求失败');debug('bookId='+bid+'\nURL='+u+'\n错误='+String(e)+'\n原始返回='+String(t).slice(0,3000))}}
-document.getElementById('overlayMask').onclick=closeOverlay;document.getElementById('panelClose').onclick=closeOverlay;
+async function loadRoles(){
+  if(!bid){statusView('未获取到 bookId；请从书籍详情页或阅读页启动');debug('SRContext='+JSON.stringify(window.SRContext||{}));return}
+  statusView('载入中…');
+  var rolePage=1,rolePageSize=50,all=[],total=0,t='',lastUrl='';
+  try{
+    while(true){
+      var a=['bookId='+bid,'count='+rolePageSize,'page='+rolePage],ts=Date.now();
+      lastUrl='https://magev6.if.qidian.com/argus/api/v1/bookrole/getroleinfolist?bookId='+encodeURIComponent(bid)+'&count='+rolePageSize+'&page='+rolePage;
+      t=await httpText(lastUrl,mkHeaders(a,ts));
+      t=String(t).replace(/\"RoleId\"\s*:\s*(\d+)/g,'\"RoleId\":\"$1\"');
+      var j=JSON.parse(t),d=j.Data||{},items=Array.isArray(d.Items)?d.Items:[];
+      if(Number(j.Result)!==0)throw new Error(j.Message||('角色列表 Result='+String(j.Result)));
+      var before=all.length;
+      items.forEach(function(r){var key=String(r.RoleId||r.RoleName||'');if(key&&!all.some(function(x){return String(x.RoleId||x.RoleName||'')===key}))all.push(r)});
+      var added=all.length-before;
+      if(!items.length||added===0)break;
+      rolePage++;
+    }
+    rolesAll=all;
+    if(!rolesAll.length)throw new Error('角色列表为空；Result=0 Message='+String(total));
+    var first=rolesAll.filter(function(r){return tabOf(r)==='主线'})[0]||rolesAll[0];choose(first,roleAvatar(first))
+  }catch(e){statusView('角色列表请求失败');debug('bookId='+bid+'\\nURL='+lastUrl+'\\n错误='+String(e)+'\\n原始返回='+String(t).slice(0,3000))}
+}
+document.getElementById('overlayMask').onclick=closeOverlay;document.getElementById('panelClose').onclick=closeOverlay;window.addEventListener('resize',schedulePickerLayout,{passive:true});if(window.visualViewport)window.visualViewport.addEventListener('resize',schedulePickerLayout,{passive:true});
 loadRoles();
 </script></body></html>
