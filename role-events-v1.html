@@ -6,7 +6,7 @@
 .wrap{max-width:760px;margin:0 auto;padding:0 16px;}
 .groupTitle{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.3px;margin:18px 2px 9px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.roleCard{min-width:0;min-height:0;display:flex;align-items:center;gap:10px;border:0;border-radius:16px;background:var(--card);color:var(--text);padding:11px;text-align:left;font:inherit;border:1px solid var(--line);overflow:hidden}
+.roleCard{min-width:0;height:60px;box-sizing:border-box;display:flex;align-items:center;gap:10px;border:0;border-radius:16px;background:var(--card);color:var(--text);padding:11px;text-align:left;font:inherit;border:1px solid var(--line);overflow:hidden}
 .roleCard:active{opacity:.7}
 .rcAva{width:36px;height:36px;border-radius:50%;flex:0 0 36px;object-fit:cover;background:rgba(127,127,127,.14)}
 .rcName{font-size:15px;font-weight:730;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -30,7 +30,7 @@
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
 .tab{border:0;border-radius:999px;background:rgba(127,127,127,.14);color:var(--sub);font-size:13px;font-weight:650;padding:8px 13px}
 .tab.on{background:#3478f6;color:#fff}
-.pickGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(var(--pick-rows,3),minmax(0,1fr));gap:10px;flex:1 1 auto;min-height:0}
+.pickGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(var(--pick-rows,3),60px);align-content:start;gap:10px;flex:1 1 auto;min-height:0}.roleCard>span:last-child{min-width:0;display:block;overflow:hidden}
 .pageRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:2px}
 .pageBtn{border:0;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:999px;font-size:14px;font-weight:700;padding:8px 14px}
 .pageBtn:disabled{opacity:.38}
