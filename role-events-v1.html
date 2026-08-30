@@ -396,7 +396,7 @@ function renderPickGrid(){
   var list=pickCurrentList(),total=Math.max(1,Math.ceil(list.length/PICK_PER));
   if(pickPage>total-1)pickPage=total-1;
   var slice=list.slice(pickPage*PICK_PER,pickPage*PICK_PER+PICK_PER),grid=document.getElementById('pickGrid');
-  grid.style.setProperty('--pick-rows',String(Math.max(1,Math.ceil(slice.length/2))));
+  grid.style.setProperty('--pick-rows',String(PICK_PER/2));
   grid.innerHTML='';
   slice.forEach(function(r){
     var el=document.createElement('button');el.className='roleCard';el.type='button';var im=roleAvatar(r);
@@ -415,17 +415,14 @@ function renderPickGrid(){
 }
 function syncPickerLayout(){
   var panel=document.querySelector('.panel'),grid=document.getElementById('pickGrid'),row=document.getElementById('pageRow');
-  if(!panel||!grid||!row||!document.getElementById('overlay').classList.contains('show'))return;
-  var panelRect=panel.getBoundingClientRect(),tabs=document.getElementById('tabs');
-  var gridTop=(tabs?tabs.getBoundingClientRect().bottom-panelRect.top:120)+10;
-  var bottomLimit=panelRect.height-64;
-  var available=Math.max(0,bottomLimit-gridTop-10);
-  var rows=Math.max(3,Math.min(8,Math.floor((available+10)/70)));
+  if(!panel||!grid||!row)return;
+  var panelHeight=panel.getBoundingClientRect().height;
+  var expanded=panelHeight>=720;
+  var rows=expanded?6:3;
   var next=rows*2;
   panel.style.setProperty('--pick-rows',String(rows));
-  panel.style.setProperty('--pick-grid-top',Math.round(gridTop)+'px');
-  var actualRows=Math.max(1,Math.ceil(pickCurrentList().slice(pickPage*next,pickPage*next+next).length/2));
-  panel.style.setProperty('--pick-page-top',Math.round(gridTop+actualRows*60+(actualRows-1)*10+10)+'px');
+  panel.style.setProperty('--pick-grid-top','120px');
+  panel.style.setProperty('--pick-page-top',String(120+rows*60+(rows-1)*10+10)+'px');
   if(next!==PICK_PER){PICK_PER=next;pickPage=0;renderPickGrid()}
 }
 function schedulePickerLayout(){
