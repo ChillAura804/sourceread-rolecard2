@@ -301,22 +301,42 @@ function QDG_makeIOSQDH(tstamp, ctx) {
 }
 ;
 
-
-function getBid(){var c=window.SRContext||{},b=c.book||c||{},u=String(c.bookUrl||b.bookUrl||b.url||c.url||'');var m=u.match(/data:bookId;base64,([A-Za-z0-9+/=]+)/);if(m)try{var s=decodeURIComponent(escape(atob(m[1]))),n=s.match(/(\d{6,})/);if(n)return n[1]}catch(e){}var x=u.match(/(?:book\/|bookId=)(\d+)/)||u.match(/(\d{6,})/);return x?x[1]:''}
-async function httpText(url,headers){
-  var bridge=window.SRNative;
-  if(!bridge||typeof bridge.http!=='function')throw new Error('SRNative.http 未注入；请从源阅用户操作调试入口打开');
-  var r=await bridge.http(url,headers||null);
-  if(typeof r==='string')return r;
-  if(r&&typeof r==='object'){
-    if(typeof r.body==='string')return r.body;
-    if(typeof r.data==='string')return r.data;
-    if(typeof r.text==='string')return r.text;
-    if(typeof r.responseText==='string')return r.responseText;
-  }
-  throw new Error('SRNative.http 返回空文本：'+String(r));
+// ===== bookId =====
+function getBid(){
+  var ctx = window.SRContext || {};
+  var book = ctx.book || ctx || {};
+  var u = String(ctx.bookUrl || book.bookUrl || book.url || ctx.url || '').trim();
+  var mb = u.match(/data:bookId;base64,([A-Za-z0-9+/=]+)/);
+  if (mb) { try { var dec=decodeURIComponent(escape(atob(mb[1]))); var mm=dec.match(/(\d{6,})/); if(mm) return mm[1]; } catch(e){} }
+  var m = u.match(/\/(?:book)\/(\d+)/) || u.match(/[?&]bookId=(\d+)/) || u.match(/(\d{6,})/);
+  if (m) return m[1];
+  return '';
 }
-function mkHeaders(arr,ts){return {'user-agent':'QDReaderAppStore/5.9.463 (iPhone; iOS 15.2; Scale/3.00)',tstamp:String(ts),qdsign:QDG_makeIOSQDSign(arr,ts),qdh:QDG_makeIOSQDH(ts),accept:'application/json'}}
+
+// ===== 请求 =====
+async function httpText(url, headers){
+  try{
+    if (window.SRNative && SRNative.http){
+      var r = await SRNative.http(url, headers||null);
+      if (typeof r === 'string') return r;
+      if (r && typeof r === 'object'){
+        if (typeof r.body === 'string') return r.body;
+        if (typeof r.data === 'string') return r.data;
+        if (typeof r.text === 'string') return r.text;
+        if (typeof r.responseText === 'string') return r.responseText;
+        try{ return JSON.stringify(r); }catch(e){}
+      }
+      if (r != null) return String(r);
+    }
+  }catch(e1){ return ''; }
+  return '';
+}
+function mkHeaders(arr, ts){
+  var qd = QDG_makeIOSQDSign(arr, ts);
+  var qh = QDG_makeIOSQDH(ts);
+  return { "user-agent":"QDReaderAppStore/5.9.463 (iPhone; iOS 15.2; Scale/3.00)", tstamp:String(ts), qdsign:qd, qdh:qh, accept:"application/json" };
+}
+
 var bid=getBid(),selected=null,page=0,loading=false,end=false;
 var $=function(s){return document.querySelector(s)};function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function closeUI(){try{if(window.SRNative&&SRNative.dismiss)SRNative.dismiss()}catch(e){}}
