@@ -9,6 +9,47 @@
 .roleStrip{display:flex;gap:10px;overflow-x:auto;padding:1px 1px 13px;scrollbar-width:none}.roleStrip::-webkit-scrollbar{display:none}.role{flex:0 0 auto;display:flex;align-items:center;gap:9px;max-width:180px;padding:10px 13px 10px 10px;border-radius:17px;background:var(--card);border:1px solid var(--line);color:var(--text);box-shadow:0 3px 10px rgba(0,0,0,.04)}.role.on{border-color:var(--blue);background:color-mix(in srgb,var(--blue) 10%,var(--card))}.ava{width:35px;height:35px;border-radius:50%;background:#d9e4ff;object-fit:cover}.rname{font-size:15px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rpos{font-size:11px;color:var(--sub);margin-top:3px}
 .state{margin:24px 3px;color:var(--sub);font-size:14px;text-align:center}.event{position:relative;margin-left:11px;padding:0 0 22px 24px;border-left:2px solid var(--line)}.event:before{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:var(--blue);left:-6px;top:6px;box-shadow:0 0 0 4px var(--bg)}.eventCard{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:14px 15px;box-shadow:0 3px 10px rgba(0,0,0,.035)}.eventTitle{font-size:16px;font-weight:750;line-height:1.45}.eventText{font-size:14px;line-height:1.62;color:var(--sub);margin-top:7px;white-space:pre-wrap}.meta{font-size:12px;color:var(--sub);margin-top:10px}.more{display:none;width:100%;border:0;border-radius:15px;background:var(--card);color:var(--blue);font-size:15px;font-weight:700;padding:13px}.more.show{display:block}.debug{display:none;font:12px ui-monospace,monospace;white-space:pre-wrap;color:#d83a3a;margin-top:15px}
 </style></head><body><main class="page"><header class="head"><div><div class="title">角色大事件</div><div id="hint" class="hint">选择角色后校正精确 ID，再加载剧情事件</div></div><button class="close" onclick="closeUI()">关闭</button></header><div id="roles" class="roleStrip"></div><section id="events"></section><button id="more" class="more">加载更多</button><pre id="debug" class="debug"></pre></main><script>
+function md5hex(str){
+  function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
+  function utf(s){ return unescape(encodeURIComponent(s)); }
+  var b=utf(str), n=b.length, i, m=[];
+  for(i=0;i*4<n;i++) m[i]=(b.charCodeAt(i*4)|b.charCodeAt(i*4+1)<<8|b.charCodeAt(i*4+2)<<16|b.charCodeAt(i*4+3)<<24)>>>0;
+  var bytesN=n, w=[];
+  // 重新按字节构造(带0x80填充)
+  var buf=[];
+  for(var k=0;k<n;k++) buf.push(b.charCodeAt(k)&0xff);
+  buf.push(0x80);
+  while(buf.length%64!==56) buf.push(0);
+  var bits=n*8;
+  for(var q62=0;q62<8;q62++) buf.push(Math.floor(bits/Math.pow(2,8*q62))%256);
+  for(var mm=0;mm*4<buf.length;mm++) w[mm]=(buf[mm*4]|buf[mm*4+1]<<8|buf[mm*4+2]<<16|buf[mm*4+3]<<24)>>>0;
+  var a0=0x67452301,b0=0xefcdab89|0,c0=0x98badcfe|0,d0=0x10325476|0;
+  var S=[7,12,17,22,7,12,17,22,7,12,17,22,7,12,17,22,5,9,14,20,5,9,14,20,5,9,14,20,5,9,14,20,4,11,16,23,4,11,16,23,4,11,16,23,4,11,16,23,6,10,15,21,6,10,15,21,6,10,15,21,6,10,15,21];
+  var K=[0xd76aa478,0xe8c7b756,0x242070db,0xc1bdceee,0xf57c0faf,0x4787c62a,0xa8304613,0xfd469501,0x698098d8,0x8b44f7af,0xffff5bb1,0x895cd7be,0x6b901122,0xfd987193,0xa679438e,0x49b40821,0xf61e2562,0xc040b340,0x265e5a51,0xe9b6c7aa,0xd62f105d,0x02441453,0xd8a1e681,0xe7d3fbc8,0x21e1cde6,0xc33707d6,0xf4d50d87,0x455a14ed,0xa9e3e905,0xfcefa3f8,0x676f02d9,0x8d2a4c8a,0xfffa3942,0x8771f681,0x6d9d6122,0xfde5380c,0xa4beea44,0x4bdecfa9,0xf6bb4b60,0xbebfbc70,0x289b7ec6,0xeaa127fa,0xd4ef3085,0x04881d05,0xd9d4d039,0xe6db99e5,0x1fa27cf8,0xc4ac5665,0xf4292244,0x432aff97,0xab9423a7,0xfc93a039,0x655b59c3,0x8f0ccc92,0xffeff47d,0x85845dd1,0x6fa87e4f,0xfe2ce6e0,0xa3014314,0x4e0811a1,0xf7537e82,0xbd3af235,0x2ad7d2bb,0xeb86d391];
+  function ad(x,y){ var l=(x&0xffff)+(y&0xffff); return ((((x>>>16)+(y>>>16)+(l>>>16))<<16)|(l&0xffff))>>>0; }
+  var j,t;
+  for(j=0;j<w.length;j+=16){
+    var A=a0,B=b0,C=c0,D=d0,fF,gIdx;
+    for(t=0;t<64;t++){
+      if(t<16){ fF=(B&C)|(~B&D); gIdx=t; }
+      else if(t<32){ fF=(D&B)|(~D&C); gIdx=(5*t+1)%16; }
+      else if(t<48){ fF=B^C^D; gIdx=(3*t+5)%16; }
+      else { fF=C^(B|(~D)); gIdx=(7*t)%16; }
+      var tmpD=D; D=C; C=B;
+      var x=ad(ad(ad(A,fF), K[t]>>>0), w[j+gIdx]>>>0);
+      B=ad(B, rl(x, S[t]));
+      A=tmpD;
+    }
+    a0=ad(a0,A);b0=ad(b0,B);c0=ad(c0,C);d0=ad(d0,D);
+  }
+  function h2(x){ var s=""; for(var q=0;q<4;q++){ s+=("0"+((x>>(q*8))&0xff).toString(16)).slice(-2);} return s; }
+  // 小端输出
+  var out="";
+  out+=h2(a0);out+=h2(b0);out+=h2(c0);out+=h2(d0);
+  return out;
+}
+
+;
 function QDG_utf8Bytes(str) {
     var s = unescape(encodeURIComponent(QDG_text(str)));
     var out = [];
