@@ -432,13 +432,12 @@ function storyList(d){
   if(!d||typeof d!=='object')return[];
   return Array.isArray(d.StoryInfoList)?d.StoryInfoList:[];
 }
-function cleanChapter(s){return String(s||'').replace(/^@/,'')}
 function render(list){
   var box=document.getElementById('events');if(!box)return;
   list.forEach(function(x){
-    var title=String(x.Title||'').trim()||cleanChapter(x.ChapterName)||'未命名事件';
+    var title=String(x.Title||'').trim()||String(x.ChapterName||'').trim()||'未命名事件';
     var text=String(x.Content||'').trim();
-    var chapter=cleanChapter(x.ChapterName);
+    var chapter=String(x.ChapterName||'').trim();
     var likes=(x.LikeCount==null?'':String(x.LikeCount));
     var meta='';
     if(chapter)meta+='<span>'+esc(chapter)+'</span>';
