@@ -1,1 +1,12 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><title>书友圈</title><style>html,body{margin:0;height:100%;background:#f7f7f8;color:#888;font-family:-apple-system,PingFang SC,sans-serif}.s{padding:64px 20px;text-align:center;font-size:14px}@media(prefers-color-scheme:dark){html,body{background:#121212}}</style></head><body><div class="s">载入中…</div><script>(async function(){try{var u='book-circle-runtime.html?t='+Date.now();var r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);var h=await r.text();document.open();document.write(h);document.close()}catch(e){document.body.innerHTML='<div class="s">载入失败：'+String(e&&e.message||e)+'</div>'}})();</script></body></html>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>书友圈</title><style>html,body{margin:0;height:100%;background:#f7f7f8;color:#8b8f97;font-family:-apple-system,PingFang SC,sans-serif}.s{padding:64px 20px;text-align:center;font-size:14px}@media(prefers-color-scheme:dark){html,body{background:#121212}}</style></head><body><div class="s">载入中…</div><script>
+(function(){
+  try{
+    var q=String(location.search||'');
+    var base=location.href.replace(/[^/]*$/,'')+'book-circle-runtime.html';
+    var sep=q&&q.length>1?q+'&':'?';
+    location.replace(base+sep+'t='+Date.now());
+  }catch(e){
+    document.body.innerHTML='<div class="s">载入失败：'+String(e&&e.message||e)+'</div>';
+  }
+})();
+</script></body></html>
