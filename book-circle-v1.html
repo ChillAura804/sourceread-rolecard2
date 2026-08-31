@@ -331,6 +331,7 @@ function mkHeaders(arr, ts){
 
 var bid=getBid(),circleId='',bookType='1',pg=1,pz=20,sortType='6',categoryId='0',subCategoryId='0',loading=false,end=false,circle=null,bookInfo=null;
 var CIRCLE_TABS=[{name:'全部',cat:'0',sub:'0'},{name:'作家说',cat:'1',sub:'0'},{name:'精华',cat:'2',sub:'0'},{name:'讨论',cat:'1049252246158442496',sub:'0'},{name:'书评',cat:'1049252246166765568',sub:'0'},{name:'同人创作',cat:'1049252246183739392',sub:'0'},{name:'周边',cat:'1049252246192062464',sub:'0'},{name:'分享',cat:'1049252246200254466',sub:'0'},{name:'其他',cat:'-1',sub:'0'}];
+function tabParams(cat){var x=CIRCLE_TABS.filter(function(c){return String(c.cat)===String(cat)})[0];return x||{cat:String(cat||'0'),sub:'0'}}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function txt(s){return String(s==null?'':s).trim()}
 function rawId(v){return String(v==null?'':v)}
