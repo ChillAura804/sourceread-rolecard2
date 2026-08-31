@@ -366,13 +366,20 @@ function decodeEntities(s){
 function applyEmoji(s){
   return String(s==null?'':s).replace(/[\[\uFF3B]fn=(\d+)[\]\uFF3D]/g,function(m,n){return EMOJI_MAP[n]||m});
 }
+function richObject(raw){var o=QDG_safeJson(raw);return o&&typeof o==='object'&&!Array.isArray(o)?o:null}
 function nodeText(z){
-  var type=Number(z&&z.Type||1),raw=String(z&&z.Text==null?'':z.Text);
-  if(type===10){var u=QDG_safeJson(raw);return u&&u.NickName?'@'+u.NickName+' ':raw}
-  if(type===20){var t=QDG_safeJson(raw);return t&&t.TopicName?'#'+t.TopicName+' ':raw}
-  if(type===30){var l=QDG_safeJson(raw);return l&&l.LinkName?l.LinkName:raw}
+  var type=Number(z&&z.Type||1),raw=String(z&&z.Text==null?'':z.Text),o=richObject(raw);
+  if(type===10||o&&o.NickName)return o&&o.NickName?'@'+o.NickName+' ':'';
+  if(type===20||o&&o.TopicName)return o&&o.TopicName?'#'+o.TopicName+' ':'';
+  if(type===30||o&&o.LinkName)return o&&o.LinkName?o.LinkName:'';
+  if(o){
+    if(o.Url||o.ImageUrl||o.ImgUrl||o.VoteId!=null||Array.isArray(o.Options))return '';
+    return String(o.Text||o.Content||o.Title||'');
+  }
   return raw;
 }
+function richNodes(v){var a=QDG_safeJson(v);return Array.isArray(a)?a:[]}
+function richNodeImages(v){var out=[];richNodes(v).forEach(function(z){var o=richObject(String(z&&z.Text==null?'':z.Text));var u=o&&String(o.Url||o.ImageUrl||o.ImgUrl||'');if(u)out.push(u)});return out}
 function cleanBody(s){
   s=String(s==null?'':s);
   s=s.replace(/<script[\s\S]*?<\/script>/gi,'').replace(/<style[\s\S]*?<\/style>/gi,'');
@@ -397,7 +404,7 @@ function htmlText(x){
   }
   return cleanBody(x.Body);
 }
-function postImages(x){var a=Array.isArray(x.ImgList)?x.ImgList:[];if(a.length)return a;return(Array.isArray(x.ImgObjList)?x.ImgObjList:[]).map(function(z){return z&&z.ImageUrl||''}).filter(Boolean)}
+function postImages(x){var out=[],add=function(u){u=String(u||'');if(u&&out.indexOf(u)<0)out.push(u)};(Array.isArray(x.ImgList)?x.ImgList:[]).forEach(add);(Array.isArray(x.ImgObjList)?x.ImgObjList:[]).forEach(function(z){add(z&&z.ImageUrl)});richNodeImages(x.BodyRichText||x.Body).forEach(add);return out}
 function dateText(v){var n=Number(v||0);if(!n)return '';var d=new Date(n),p=function(x){return ('0'+x).slice(-2)};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())}
 function showState(s){document.getElementById('wrap').innerHTML='<div class="state">'+esc(s)+'</div>'}
 function circleFromBookRaw(raw){var m=String(raw).match(/"BookCircleScope"[\s\S]*?"BookCircleDetail"\s*:\s*\[([\s\S]*?)\]/);if(!m)return '';var x=m[1].match(/"CircleId"\s*:\s*"?(\d+)"?/);return x?x[1]:''}
@@ -460,21 +467,19 @@ async function loadPosts(reset){if(loading||end)return;loading=true;var a=['book
 async function init(){if(!bid){showState('未获取到 bookId；请从书籍详情页或阅读页启动');return}showState('载入中…');try{await loadBookDetail();await loadCircleDetail()}catch(e){showState('书友圈请求失败');var d=document.createElement('pre');d.className='debug';d.style.display='block';d.textContent='bookId='+bid+'\nCircleId='+circleId+'\n错误='+String(e);document.getElementById('wrap').appendChild(d)}}
 document.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='IMG')t.remove()},true);(function(){var pg=document.querySelector('.page');if(!pg)return;function sync(){var b=document.querySelector('.tabs-sticky');if(b)b.classList.toggle('scrolled',pg.scrollTop>6)}pg.addEventListener('scroll',sync,{passive:true});setTimeout(sync,0)})();var viewerList=[],viewerIdx=0;function showViewer(i){var v=document.getElementById('viewer'),im=document.getElementById('viewerImg'),c=document.getElementById('viewerCount');if(!v||!im||!viewerList.length)return;viewerIdx=(i+viewerList.length)%viewerList.length;im.src=viewerList[viewerIdx];if(c)c.textContent=viewerList.length>1?(viewerIdx+1)+' / '+viewerList.length:'';v.classList.add('on')}function hideViewer(){var v=document.getElementById('viewer');if(v)v.classList.remove('on')}document.addEventListener('click',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('img')){var card=t.closest('.imgs');viewerList=card?Array.prototype.slice.call(card.querySelectorAll('.img')).map(function(z){return z.src}):[t.src];showViewer(viewerList.indexOf(t.src));return}if(t&&(t.id==='viewer'||t.id==='viewerClose'))hideViewer()});document.addEventListener('click',function(e){var v=document.getElementById('viewer');if(!v||!v.classList.contains('on'))return;if(e.target&&e.target.id==='viewerImg'&&viewerList.length>1)showViewer(viewerIdx+1)});var dPostId='',dPg=1,dEnd=false,dLoading=false;
 var postIdFixCache={};
-function compactPostIdCandidates(rounded){
+function allIdCandidates(rounded){
   var out=[];
   try{
-    var base=BigInt(String(rounded||'').trim()),abs=base<0n?-base:base;
-    var bits=abs.toString(2).length,radius=bits>53?(1n<<BigInt(bits-53)):1n;
-    var lo=base-radius,hi=base+radius,residues=[0n,1n,2n];
-    residues.forEach(function(r){
-      var mod=((base%256n)+256n)%256n;
-      var up=base+((r-mod+256n)%256n),down=up-256n;
-      if(up>=lo&&up<=hi)out.push(String(up));
-      if(down>=lo&&down<=hi)out.push(String(down));
-    });
-    out.sort(function(a,b){var da=BigInt(a)-base,db=BigInt(b)-base;if(da<0n)da=-da;if(db<0n)db=-db;return da<db?-1:da>db?1:0});
-  }catch(e){out.push(String(rounded||''))}
-  return out.filter(function(v,i,a){return a.indexOf(v)===i}).slice(0,3);
+    var base=BigInt(String(rounded||'').trim()),abs=base<0n?-base:base,bits=abs.toString(2).length,radius=bits>53?(1n<<BigInt(bits-53)):1n;
+    for(var d=0n;d<=radius;d++){out.push(String(base+d));if(d)out.push(String(base-d))}
+    var common=[],rest=[];out.forEach(function(v){var r=((BigInt(v)%256n)+256n)%256n;(r===0n||r===1n||r===2n?common:rest).push(v)});out=common.concat(rest);
+  }catch(e){out=[String(rounded||'')]}
+  return out.filter(function(v,i,a){return a.indexOf(v)===i});
+}
+async function resolveInBatches(rounded,probe){
+  var list=allIdCandidates(rounded),last='';
+  for(var i=0;i<list.length;i+=8){try{return await firstResolved(list.slice(i,i+8).map(probe))}catch(e){last=String(e&&e.message||e)}}
+  throw new Error(last||'ID校正失败');
 }
 async function probePostCandidate(postId){
   var a=['appappend=1LkpFA','circleId='+circleId,'cursor=0','pg=1','postId='+postId,'pz=1','sort=0','topicId=0','useCursor=0'],ts=Date.now();
@@ -490,7 +495,7 @@ async function firstResolved(tasks){
 }
 async function resolveExactPostId(roundedId){
   var key=String(roundedId||'');if(postIdFixCache[key])return postIdFixCache[key];
-  var exact=await firstResolved(compactPostIdCandidates(key).map(probePostCandidate));postIdFixCache[key]=exact;return exact;
+  var exact=await resolveInBatches(key,probePostCandidate);postIdFixCache[key]=exact;return exact;
 }
 var dLoaded=0,subStates={};
 function atName(x){var a=x&&x.At||{};return txt(a.NickName||a.UserName||a.Name||'')}
@@ -498,7 +503,7 @@ function actionIcons(kind){return kind==='reply'?'<svg viewBox="0 0 24 24"><path
 function replyHtml(x,idx){
   var name=txt(x.UserName)||'匿名',ava=txt(x.UserHeadIcon),rank=txt(x.RankName),ip=txt(x.IpLocation),at=atName(x);
   var body=cleanBody(nodeListText(x.Body)),like=Number(x.StarCount||0)||0,sub=Number(x.PostCount||0)||0,rid=rawId(x.Id||x.ReviewId||'');
-  var imgs=Array.isArray(x.ImgList)?x.ImgList:[],floor=dLoaded+idx+1;
+  var imgs=postImages(x),floor=dLoaded+idx+1;
   return '<article class="reply-card" data-review-card="'+esc(rid)+'"><div class="reply-head">'+(ava?'<img class="reply-ava" src="'+esc(ava)+'" referrerpolicy="no-referrer">':'<span class="reply-ava"></span>')+
     '<div class="reply-main"><div class="reply-top"><span class="reply-name">'+esc(name)+'</span>'+(rank?'<span class="reply-rank">'+esc(rank)+'</span>':'')+'<span class="reply-floor">#'+floor+'</span></div>'+
     (at?'<div class="reply-at">回复 @'+esc(at)+'</div>':'')+(body?'<div class="reply-body">'+esc(body).replace(/\n/g,'<br>')+'</div>':'')+
@@ -506,7 +511,7 @@ function replyHtml(x,idx){
     '<div class="reply-foot"><span>'+esc(dateText(x.PostDate))+(ip?' · '+esc(ip):'')+'</span><span class="reply-actions"><button class="reply-action sub-toggle" data-review="'+esc(rid)+'" data-count="'+sub+'" '+(sub?'':'disabled')+'>'+actionIcons('reply')+'<span>'+sub+'</span></button><span class="reply-action">'+actionIcons('like')+'<span>'+like+'</span></span></span></div></div></div><div class="sub-box" id="sub-'+esc(rid)+'"></div></article>';
 }
 function topicHtml(x,total){
-  var name=txt(x.UserName)||'匿名',ava=txt(x.UserHeadIcon),body=cleanBody(nodeListText(x.Body)),subject=cleanBody(x.Subject),imgs=Array.isArray(x.ImgList)?x.ImgList:[];
+  var name=txt(x.UserName)||'匿名',ava=txt(x.UserHeadIcon),body=cleanBody(nodeListText(x.Body)),subject=cleanBody(x.Subject),imgs=postImages(x);
   return '<section class="topic-card"><div class="topic-label">主帖</div><div class="reply-head">'+(ava?'<img class="reply-ava" src="'+esc(ava)+'" referrerpolicy="no-referrer">':'<span class="reply-ava"></span>')+'<div class="reply-main"><div class="reply-top"><span class="reply-name">'+esc(name)+'</span></div>'+(subject?'<div class="subject">'+esc(subject)+'</div>':'')+(body?'<div class="reply-body">'+esc(body).replace(/\n/g,'<br>')+'</div>':'')+(imgs.length?'<div class="imgs">'+imgs.map(function(u){return '<img class="img" src="'+esc(u)+'" loading="lazy" referrerpolicy="no-referrer">'}).join('')+'</div>':'')+'</div></div></section><div class="reply-section-title">全部回复 · '+total+'</div><div class="reply-list" id="replyList"></div>';
 }
 function nodeListText(v){
@@ -550,7 +555,7 @@ async function probeReviewCandidate(reviewId,pg){
 }
 async function loadSubReplies(rounded,box,more){
   var key=String(rounded||''),st=subStates[key]||{id:'',pg:1,end:false,loading:false};if(st.loading||st.end)return;st.loading=true;subStates[key]=st;box.classList.add('on');
-  try{var r;if(!st.id){r=await firstResolved(compactPostIdCandidates(key).map(function(id){return probeReviewCandidate(id,1)}));st.id=r.id}else r=await probeReviewCandidate(st.id,st.pg);var arr=reviewRows(r.data);if(!more)box.innerHTML='';box.insertAdjacentHTML('beforeend',arr.map(subReplyHtml).join(''));st.end=!arr.length||arr.length<20;if(!st.end){st.pg++;box.insertAdjacentHTML('beforeend','<button class="sub-more" data-more="'+esc(key)+'">继续加载</button>')}}catch(e){box.innerHTML='<div class="empty">楼中楼加载失败</div>'}st.loading=false;
+  try{var r;if(!st.id){r=await resolveInBatches(key,function(id){return probeReviewCandidate(id,1)});st.id=r.id}else r=await probeReviewCandidate(st.id,st.pg);var arr=reviewRows(r.data);if(!more)box.innerHTML='';box.insertAdjacentHTML('beforeend',arr.map(subReplyHtml).join(''));st.end=!arr.length||arr.length<20;if(!st.end){st.pg++;box.insertAdjacentHTML('beforeend','<button class="sub-more" data-more="'+esc(key)+'">继续加载</button>')}}catch(e){box.innerHTML='<div class="empty">楼中楼加载失败</div>'}st.loading=false;
 }
 function closeDetail(){var v=document.getElementById('detail');if(v)v.classList.remove('on')}
 document.addEventListener('click',function(e){
