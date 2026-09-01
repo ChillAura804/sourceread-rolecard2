@@ -496,13 +496,28 @@ async function probePostCandidate(postId){
 }
 function nearIdCandidates(v){
   var s=rawId(v),out=[s];
-  try{var b=BigInt(s);out=[s,String(b+1n),String(b-1n),String(b+2n),String(b-2n)]}catch(e){}
+  try{
+    var b=BigInt(s),abs=b<0n?-b:b,bits=abs.toString(2).length;
+    var ulp=bits>53?(1n<<BigInt(bits-53)):1n;
+    for(var d=1n;d<=ulp;d++){out.push(String(b+d));out.push(String(b-d))}
+    var head=[],tail=[];
+    out.forEach(function(x){var r=((BigInt(x)%256n)+256n)%256n;(r===0n||r===1n||r===2n?head:tail).push(x)});
+    out=[s].concat(head,tail);
+  }catch(e){}
   return out.filter(function(x,i,a){return x&&a.indexOf(x)===i});
+}
+async function resolveInBatches(rounded,probe){
+  var list=nearIdCandidates(rounded),last='';
+  for(var i=0;i<list.length;i+=8){
+    try{return await firstResolved(list.slice(i,i+8).map(probe))}
+    catch(e){last=String(e&&e.message||e)}
+  }
+  throw new Error(last||'帖子不存在');
 }
 async function resolveExactPostId(roundedId){
   var key=rawId(roundedId);
   if(postIdFixCache[key])return postIdFixCache[key];
-  var exact=await firstResolved(nearIdCandidates(key).map(probePostCandidate));
+  var exact=await resolveInBatches(key,probePostCandidate);
   postIdFixCache[key]=exact;return exact;
 }
 var dLoaded=0,subStates={};
@@ -563,7 +578,7 @@ async function probeReviewCandidate(reviewId,pg){
 }
 async function loadSubReplies(rounded,box,more){
   var key=String(rounded||''),st=subStates[key]||{id:'',pg:1,end:false,loading:false};if(st.loading||st.end)return;st.loading=true;subStates[key]=st;box.classList.add('on');
-  try{var r;if(!st.id){r=await firstResolved(nearIdCandidates(key).map(function(id){return probeReviewCandidate(id,1)}));st.id=r.id}else r=await probeReviewCandidate(st.id,st.pg);var arr=reviewRows(r.data);if(!more)box.innerHTML='';box.insertAdjacentHTML('beforeend',arr.map(subReplyHtml).join(''));st.end=!arr.length||arr.length<20;if(!st.end){st.pg++;box.insertAdjacentHTML('beforeend','<button class="sub-more" data-more="'+esc(key)+'">继续加载</button>')}}catch(e){box.innerHTML='<div class="empty">楼中楼加载失败</div>'}st.loading=false;
+  try{var r;if(!st.id){r=await resolveInBatches(key,function(id){return probeReviewCandidate(id,1)});st.id=r.id}else r=await probeReviewCandidate(st.id,st.pg);var arr=reviewRows(r.data);if(!more)box.innerHTML='';box.insertAdjacentHTML('beforeend',arr.map(subReplyHtml).join(''));st.end=!arr.length||arr.length<20;if(!st.end){st.pg++;box.insertAdjacentHTML('beforeend','<button class="sub-more" data-more="'+esc(key)+'">继续加载</button>')}}catch(e){box.innerHTML='<div class="empty">楼中楼加载失败</div>'}st.loading=false;
 }
 function closeDetail(){var v=document.getElementById('detail');if(v)v.classList.remove('on')}
 document.addEventListener('click',function(e){
