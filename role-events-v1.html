@@ -36,11 +36,11 @@
 .pageBtn:disabled{opacity:.38}
 .pageInfo{font-size:13px;color:var(--sub)}
 .debug{display:none;font:12px ui-monospace,monospace;white-space:pre-wrap;color:#d83a3a;margin-top:14px}
-body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,none);background-size:cover;background-position:center;filter:blur(22px) saturate(170%);opacity:.5;z-index:0;pointer-events:none;}.page{position:relative;z-index:1;}.wrap,.page>.wrap{position:relative;z-index:1;}body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 66%,transparent);z-index:0;pointer-events:none;}
-body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,none);background-size:cover;background-position:center;filter:blur(20px) saturate(160%);opacity:.5;z-index:0;pointer-events:none;}
+body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,none);background-size:cover;background-position:center;filter:blur(22px) saturate(170%);opacity:.5;z-index:0;pointer-events:none;}.page{position:relative;z-index:1;}.wrap,.page>.wrap{position:relative;z-index:1;}
+
 body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,transparent);z-index:0;pointer-events:none;}
 .page{position:relative;z-index:1;}
-</style></head><body>
+</style></head><body><div id="appBg" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;filter:blur(20px) saturate(160%);"></div><div id="appBgTint" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-color:rgba(127,127,140,.45);"></div>
 <div class="page"><div class="wrap" id="wrap"></div></div>
 <div class="overlay" id="overlay"><div class="overlayMask" id="overlayMask"></div><section class="panel"><div class="panelTop"><span class="panelTitle">选择角色</span><button class="panelClose" type="button" id="panelClose">关闭</button></div><div class="tabs" id="tabs"></div><div class="pickGrid" id="pickGrid"></div><div class="pageRow" id="pageRow"></div></section></div>
 <script>
@@ -514,4 +514,6 @@ async function loadRoles(){
 }
 document.getElementById('overlayMask').onclick=closeOverlay;document.getElementById('panelClose').onclick=closeOverlay;window.addEventListener('resize',schedulePickerLayout,{passive:true});if(window.visualViewport)window.visualViewport.addEventListener('resize',schedulePickerLayout,{passive:true});
 loadRoles();
+
+(function(){var pb=bid?('https://bookcover.yuewen.com/qdbimg/349573/'+bid+'/180.webp'):'';var ab=document.getElementById('appBg');if(ab&&pb)ab.style.backgroundImage='url('+pb+')';})();
 </script></body></html>
