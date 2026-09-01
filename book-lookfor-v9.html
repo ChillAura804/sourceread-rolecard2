@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<title>本书看点 v16</title>
+<title>本书看点 v17</title>
 <style>
 :root{color-scheme:light dark;--bg:#f5f5f7;--card:#ffffff;--text:#111827;--sub:#8b8f97;--line:rgba(0,0,0,.07);--primary:#3478f6;--chip:rgba(52,120,246,.10);--safeTop:env(safe-area-inset-top,0px);--safeBottom:env(safe-area-inset-bottom,0px);
   --card-w:min(90vw,680px);--card-h:min(calc(100dvh - 170px),820px);--deck-min:.1px;--stack:10px;}
@@ -61,7 +61,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 <div class="panel" id="listPanel"><div class="panel-bar"><button class="pbtn" type="button" data-back="listPanel">‹ 返回</button><span class="ptitle" id="listTitle">全部书单</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="list" id="listBox"></div></div>
 <div class="detail" id="detailPanel"><div class="detail-bar"><button class="pbtn" type="button" data-back="detailPanel">‹ 返回</button><span class="ptitle">书单详情</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="detail-scroll" id="detailBox"></div></div>
 <script>
-var BUILD_ID="20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
+var BUILD_ID="20260901121420";//20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
 
 function md5hex(str){
   function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
@@ -405,24 +405,10 @@ function firstResolved(tasks){
 
 
 
-var bid=getBid(),circleId='',bookType='1',pg=1,pz=20,sortType='6',categoryId='0',subCategoryId='0',loading=false,end=false,circle=null,bookInfo=null;
-var CIRCLE_UNUSED_TOP_TABS=[{name:'精华',cat:'2',sub:'0'},{name:'讨论',cat:'1049252246158442496',sub:'0'}];
-var CIRCLE_SUB_TABS=[{name:'全部',cat:'0',sub:'0'},{name:'作家说',cat:'1',sub:'0'},{name:'书评',cat:'1049252246166765568',sub:'0'},{name:'同人创作',cat:'1049252246183739392',sub:'0'}];
-var CIRCLE_TABS=CIRCLE_SUB_TABS;
-var filterMode='dynamic';
-function tabParams(cat){var x=CIRCLE_TABS.filter(function(c){return String(c.cat)===String(cat)})[0];return x||{cat:String(cat||'0'),sub:'0'}}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function txt(s){return String(s==null?'':s).trim()}
 function show(error){document.getElementById('deck').outerHTML='<div class="state">'+esc(error||'')+'</div>'}
-function cardIcon(){
-  return '<svg viewBox="0 0 24 24" width="13" height="13"><path d="M7 21V10.2L12.2 3c.9 0 1.7.8 1.7 1.8L13 9.2h6.1c1.1 0 2 .9 1.8 2l-1.4 8c-.1.9-.9 1.6-1.8 1.6H7zM7 21H4.5c-.8 0-1.5-.7-1.5-1.5v-7.8c0-.8.7-1.5 1.5-1.5H7"/></svg>';
-}
-function bookCover(x){
-  var img=String(x.Image||'');
-  if(img)return '<img class="card-img" src="'+esc(img)+'" loading="lazy" referrerpolicy="no-referrer"><span class="badge">'+esc(x.ModelName||'看点')+'</span>';
-  var t=txt(x.Title||x.SubTitle||'看');
-  return '<div class="card-noimg"><span class="big">'+esc(t.charAt(0))+'</span><span class="badge">'+esc(x.ModelName||'看点')+'</span></div>';
-}
+
 function statIcons(x){return '<span class="foot-stat"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>'+(Number(x.TotalCount||0)||0)+' 本</span>'}
 function cardHtml(x){
   var idx=looks.indexOf(x),title=txt(x.Title||x.SubTitle||''),body=txt(x.Body||'');
@@ -461,17 +447,10 @@ function detailHtml(x){
     '</div></div>'+
     '<div class="dt-body">'+esc(body||'暂无简介')+'</div>';
 }
-function showList(){
-  var p=document.getElementById('listPanel');if(!p)return;
-  document.getElementById('listBox').innerHTML=looks.map(listItemHtml).join('');
-  p.classList.add('on');
-}
+
 var listCache=null,listEnd=false,listPg=1,listLoading=false;
 
 function firstStr(x,keys){var s='';keys.forEach(function(k){if(!s&&x&&k in x&&x[k]!=null&&String(x[k]).trim())s=String(x[k])});return s}
-function coverUrl(x){return firstStr(x,['Image','BookCover','Cover','ImageUrl','ImgUrl','BookImageUrl','Icon'])}
-function blidOf(x){var v=firstStr(x,['BookListId','bookListId','Id','id','IdStr']);return v}
-function commentCount(x){var n=firstStr(x,['CommentCount','ReviewCount','CommentNum','CommentTotal']);return n?Number(n):0}
 function coverUrlOf(x){return txt(x.BookId)?'https://bookcover.yuewen.com/qdbimg/349573/'+txt(x.BookId)+'/180.webp':''}
 function bookCardHtml(x){
   var title=txt(x.BookName||'未知书籍'),author=txt(x.BookAuthor||''),
@@ -489,25 +468,7 @@ function bookCardHtml(x){
     '</div></div>';
 }
 
-function adaptiveListTitle(x){var s='';Object.keys(x).forEach(function(k){if(!s&&/title|name|Name/.test(k)&&typeof x[k]==='string'&&x[k])s=x[k]});return s||'条目'}
-function adaptiveListMeta(x){var parts=[];Object.keys(x).forEach(function(k){if(/author|Author|user|User/.test(k)&&typeof x[k]==='string'&&x[k])parts.push(x[k])});return parts.join(' · ')}
-function itemsFrom(data){
-  var out=[],seen={};
-  function push(x){if(x&&typeof x==='object'&&!Array.isArray(x)){var k=JSON.stringify(x).slice(0,120);if(!seen[k]){seen[k]=1;out.push(x)}}}
-  function walk(v){if(!v||typeof v!=='object')return;
-    if(Array.isArray(v)){v.forEach(push);return}
-    Object.keys(v).forEach(function(k){walk(v[k])})}
-  walk(data);
-  var first=out.length?out:[];
-  return first.slice(0,40);
-}
-function listHtmlFrom(arr){
-  return arr.map(function(x,i){
-    var t=adaptiveListTitle(x),m=adaptiveListMeta(x);
-    return '<div class="list-item"><div class="li-title">'+esc(t)+'</div>'+(m?'<div class="li-meta">'+esc(m)+'</div>':'')+
-      '<div class="li-desc">'+esc(JSON.stringify(x).slice(0,160))+'</div></div>';
-  }).join('');
-}
+
 async function loadList(reset){
   if(listLoading)return;listLoading=true;
   var lp=document.getElementById('listPanel');if(lp)lp.classList.add('on');
@@ -525,7 +486,7 @@ async function loadList(reset){
     var j=QDG_safeJson(raw)||{};
     if(Number(j.Result)!==0)throw new Error(txt(j.Message)||'Result='+j.Result);
     listCache=Array.isArray(j.Data&&j.Data.BookLists)?j.Data.BookLists:[];listEnd=!listCache.length;
-    document.getElementById('listBox').innerHTML=listCache.length?listHtmlFrom(listCache):('<div class="state">暂无书单数据<br><span style="font-size:10px;color:var(--sub)">'+esc(raw.slice(0,400))+'</span></div>');
+    document.getElementById('listBox').innerHTML=listCache.length?listCache.map(listItemHtml).join(''):('<div class="state">暂无书单数据<br><span style="font-size:10px;color:var(--sub)">'+esc(raw.slice(0,400))+'</span></div>');
     document.getElementById('listTitle').textContent='全部书单 '+listCache.length+' 条';
   }catch(e){
     document.getElementById('listBox').innerHTML='<div class="state">书单列表加载失败<br><span style="font-size:11px">'+esc(String(e&&e.message||e))+'</span></div>';
