@@ -61,7 +61,9 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 <div class="panel" id="listPanel"><div class="panel-bar"><button class="pbtn" type="button" data-back="listPanel">‹ 返回</button><span class="ptitle" id="listTitle">全部书单</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="list" id="listBox"></div></div>
 <div class="detail" id="detailPanel"><div class="detail-bar"><button class="pbtn" type="button" data-back="detailPanel">‹ 返回</button><span class="ptitle">书单详情</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="detail-scroll" id="detailBox"></div></div>
 <script>
-var BUILD_ID="20260901141239";function md5hex(str){
+var BUILD_ID="20260901141239";//20260901140433";//20260901134829";//20260901133502";//20260901132544";//20260901132051";//20260901131528";//20260901131208";//20260901130856";//20260901130655";//20260901130144";//20260901130046";//20260901125830";//20260901125038";//20260901124812";//20260901124528";//20260901123528";//20260901122021";//20260901121420";//20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
+
+function md5hex(str){
   function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
   function utf(s){ return unescape(encodeURIComponent(s)); }
   var b=utf(str), n=b.length, i, m=[];
@@ -446,6 +448,21 @@ function detailHtml(x){
 
 var listCache=null,listEnd=false,listPg=1,listLoading=false;
 
+function coverUrlOf(x){return txt(x.BookId)?'https://bookcover.yuewen.com/qdbimg/349573/'+txt(x.BookId)+'/180.webp':''}
+function bookCardHtml(x){
+  var title=txt(x.BookName||'未知书籍'),author=txt(x.BookAuthor||''),
+      cat=txt(x.CategoryName||''),brief=txt(x.BookBriefWords||''),intro=txt(x.BookIntroWords||''),
+      fav=Number(x.BeFavoredCount||0)||0,words=Number(x.WordsCount||0)||0,img=coverUrlOf(x);
+  return '<div class="book-item">'+
+    (img?'<div class="book-cover"><img src="'+esc(img)+'" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div>':'')+
+    '<div class="book-info" style="flex:1;min-width:0">'+
+    '<div class="book-name">'+showTxt(title)+'</div>'+
+    '<div class="book-author">'+(author?esc(author)+' · ':'')+(cat?esc(cat):'')+(words?' · '+words+'字':'')+'</div>'+
+    (brief?'<div class="book-desc">'+showTxt(brief)+'</div>':'')+
+    (fav?'<div class="book-foot">收藏 '+fav+'</div>':'')+
+    '</div></div>'+
+    (intro?'<div class="book-intro"><span class="intro-tag">书单评语</span>'+showTxt(intro)+'</div>':'')
+}
 
 
 async function loadList(reset){
