@@ -37,6 +37,9 @@
 .pageInfo{font-size:13px;color:var(--sub)}
 .debug{display:none;font:12px ui-monospace,monospace;white-space:pre-wrap;color:#d83a3a;margin-top:14px}
 body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,none);background-size:cover;background-position:center;filter:blur(22px) saturate(170%);opacity:.5;z-index:0;pointer-events:none;}.page{position:relative;z-index:1;}.wrap,.page>.wrap{position:relative;z-index:1;}body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 74%,transparent);z-index:0;pointer-events:none;}
+body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,none);background-size:cover;background-position:center;filter:blur(20px) saturate(160%);opacity:.5;z-index:0;pointer-events:none;}
+body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,transparent);z-index:0;pointer-events:none;}
+.page{position:relative;z-index:1;}
 </style></head><body>
 <div class="page"><div class="wrap" id="wrap"></div></div>
 <div class="overlay" id="overlay"><div class="overlayMask" id="overlayMask"></div><section class="panel"><div class="panelTop"><span class="panelTitle">选择角色</span><button class="panelClose" type="button" id="panelClose">关闭</button></div><div class="tabs" id="tabs"></div><div class="pickGrid" id="pickGrid"></div><div class="pageRow" id="pageRow"></div></section></div>
