@@ -353,7 +353,15 @@ var filterMode='dynamic';
 function tabParams(cat){var x=CIRCLE_TABS.filter(function(c){return String(c.cat)===String(cat)})[0];return x||{cat:String(cat||'0'),sub:'0'}}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function txt(s){return String(s==null?'':s).trim()}
-function rawId(v){return String(v==null?'':v)}
+function rawId(v){
+  if(v==null)return '';
+  if(typeof v==='number'){
+    if(!isFinite(v))return '';
+    if(Number.isInteger(v)){try{return BigInt(v).toString()}catch(e){}}
+    return String(v);
+  }
+  return String(v);
+}
 function quoteBigIds(s){return String(s==null?'':s).replace(/"(Id|PostId|ReviewId|CircleId|TopicId|UserId|StatId)"\s*:\s*(\d{16,})/g,'"$1":"$2"')}
 var EMOJI_MAP={"31": "😳", "21": "😍", "11": "🙄", "32": "😎", "12": "😭", "43": "☺️", "50": "🤐", "45": "😴", "19": "😂", "37": "😡", "47": "😱", "26": "🤪", "4": "😁", "40": "😞", "36": "🤓", "17": "😓", "24": "😫", "51": "🥴", "33": "🤭", "7": "🙂", "49": "😪", "16": "🥵", "14": "😥", "5": "😄", "46": "🤠🚬", "29": "💪", "44": "🤬", "39": "😄❓", "18": "🤫", "13": "😵", "28": "😣", "20": "😢", "30": "💀", "22": "🤕🔨", "34": "😄👏", "10": "👆🏻🐽", "1": "👏", "23": "😑", "8": "😏", "41": "😧", "15": "🖕🏻", "38": "🙁", "58": "😒", "9": "😙", "60": "😮", "6": "🥺", "54": "🔪", "48": "🐷", "2": "🌹", "42": "💋", "53": "❤️", "56": "💔", "52": "🌙", "55": "🎁", "25": "🤗", "35": "👍🏻", "3": "🤝", "59": "✌🏻️", "27": "🙏", "57": "👊🏻", "61": "🤨", "62": "😴", "63": "👏🏻", "64": "🐲"};
 function decodeEntities(s){
@@ -407,7 +415,7 @@ function htmlText(x){
 function postImages(x){var out=[],add=function(u){u=String(u||'');if(u&&out.indexOf(u)<0)out.push(u)};(Array.isArray(x.ImgList)?x.ImgList:[]).forEach(add);(Array.isArray(x.ImgObjList)?x.ImgObjList:[]).forEach(function(z){add(z&&z.ImageUrl)});richNodeImages(x.BodyRichText||x.Body).forEach(add);return out}
 function dateText(v){var n=Number(v||0);if(!n)return '';var d=new Date(n),p=function(x){return ('0'+x).slice(-2)};return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())}
 function showState(s){document.getElementById('wrap').innerHTML='<div class="state">'+esc(s)+'</div>'}
-function circleFromBookRaw(raw){var m=String(raw).match(/"BookCircleScope"[\s\S]*?"BookCircleDetail"\s*:\s*\[([\s\S]*?)\]/);if(!m)return '';var x=m[1].match(/"CircleId"\s*:\s*"?(\d+)"?/);return x?x[1]:''}
+function circleFromBookRaw(raw){var m=String(raw).match(/"BookCircleScope"[\s\S]*?"BookCircleDetail"\s*:\s*\[([\s\S]*?)\]/);if(!m)return '';var x=m[1].match(/"CircleId"\s*:\s*"?(\d+)"?/);return x?rawId(x[1]):''}
 function bookTypeFromRaw(raw){var m=String(raw).match(/"BaseBookInfo"[\s\S]*?"BookType"\s*:\s*"?(\d+)"?/);return m?m[1]:'1'}
 function applyRawCategoryIds(raw,d){var cm=String(raw).match(/"PostCategoryList"\s*:\s*\[([\s\S]*?)\]\s*,"PostCategoryListV2"/);if(!cm||!Array.isArray(d.PostCategoryList))return;var ids=[],re=/"Id"\s*:\s*(-?\d+)/g,m;while((m=re.exec(cm[1])))ids.push(m[1]);d.PostCategoryList.forEach(function(c,i){if(ids[i]!==undefined){c.Id=ids[i];c.JsId=ids[i]}})}
 async function loadBookDetail(){var a=['bookId='+bid,'cbid=-1','isOutBook=0'],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v3/bookdetail/get?'+a.join('&'),raw=await httpText(u,mkHeaders(a,ts));var j=QDG_safeJson(raw)||{};if(Number(j.Result)!==0)throw new Error(txt(j.Message)||'bookdetail/get failed');circleId=circleFromBookRaw(raw);bookType=bookTypeFromRaw(raw);bookInfo=j.Data||{};if(!circleId)throw new Error('BookCircleScope.BookCircleDetail[].CircleId missing');return raw}
@@ -462,40 +470,22 @@ function updateFilterState(){
   document.querySelectorAll('[data-filter-kind="dynamic"],[data-filter-kind="essence"]').forEach(function(b){var k=b.getAttribute('data-filter-kind');b.className='sort-opt'+(filterMode===k?' on':'')});
   document.querySelectorAll('[data-filter-kind="cat"]').forEach(function(b){var active=(filterMode==='cat'&&String(categoryId)===String(b.getAttribute('data-cat'))&&String(subCategoryId)===String(b.getAttribute('data-sub')||'0'))||(String(b.getAttribute('data-cat'))==='0'&&String(b.getAttribute('data-sub')||'0')==='0'&&(filterMode==='dynamic'||filterMode==='essence'));b.className='tab filter-btn'+(active?' filter-active':'')});
 }
-async function loadCircleDetail(){var a=['bookId='+bid,'bookType='+bookType,'circleId='+circleId],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/circle/getcircledetail?'+a.join('&'),raw=await httpText(u,mkHeaders(a,ts)),j=QDG_safeJson(raw)||{};if(Number(j.Result)!==0)throw new Error(txt(j.Message)||'getcircledetail failed');var d=j.Data||{};applyRawCategoryIds(raw,d);document.getElementById('wrap').innerHTML=renderHeader(d)+'<div id="posts"></div><div class="loading" id="loading"></div><div class="debug" id="debug"></div><div class="foot"></div>';var st=document.getElementById('bookStats'),bi=bookInfo&&bookInfo.BookCircleScope||{};if(st)st.textContent=(bi.TotalFansCount||circle.FansCount||0)+' 位书友 · '+(bi.BookForumCount||circle.PostCount||0)+' 帖';bindHeader();await loadPosts(false)}
+async function probeCircle(cid){var a=['bookId='+bid,'bookType='+bookType,'circleId='+cid],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/circle/getcircledetail?'+a.join('&');var raw=await httpText(u,mkHeaders(a,ts)),j=QDG_safeJson(raw)||{};if(Number(j.Result)!==0)throw new Error(txt(j.Message)||String(j.Result));return {cid:cid,raw:raw,json:j}}
+async function loadCircleDetail(){var picked=await firstResolved(nearIdCandidates(circleId).map(probeCircle));circleId=picked.cid;var raw=picked.raw,j=picked.json;var d=j.Data||{};applyRawCategoryIds(raw,d);document.getElementById('wrap').innerHTML=renderHeader(d)+'<div id="posts"></div><div class="loading" id="loading"></div><div class="debug" id="debug"></div><div class="foot"></div>';var st=document.getElementById('bookStats'),bi=bookInfo&&bookInfo.BookCircleScope||{};if(st)st.textContent=(bi.TotalFansCount||circle.FansCount||0)+' 位书友 · '+(bi.BookForumCount||circle.PostCount||0)+' 帖';bindHeader();await loadPosts(false)}
 async function loadPosts(reset){if(loading||end)return;loading=true;var a=['bookId='+bid,'bookType='+bookType,'circleId='+circleId,'pg='+pg,'postCategoryId='+categoryId,'pz='+pz,'sortType='+sortType,'subCategoryId='+subCategoryId],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/circle/getcirclepostlist?'+a.join('&'),raw='';try{raw=await httpText(u,mkHeaders(a,ts));var j=QDG_safeJson(quoteBigIds(raw))||{},d=j.Data||{},arr=Array.isArray(d.TopicDataList)?d.TopicDataList:[];if(Number(j.Result)!==0)throw new Error(txt(j.Message)||'getcirclepostlist failed');if(reset)document.getElementById('posts').innerHTML='';renderPosts(arr);var total=Number(d.TotalCount||0),m=document.getElementById('loading');var pc=document.getElementById('postCount');if(pc)pc.textContent=total?total+' 条书评':'';end=!arr.length||pg*pz>=total;if(m)m.textContent=end?'':'加载中…';if(!end)pg++}catch(e){var de=document.getElementById('debug');if(de){de.style.display='block';de.textContent='bookId='+bid+'\nCircleId='+circleId+'\nURL='+u+'\n错误='+String(e)+'\n完整响应='+raw}}loading=false}
 async function init(){if(!bid){showState('未获取到 bookId；请从书籍详情页或阅读页启动');return}showState('载入中…');try{await loadBookDetail();await loadCircleDetail()}catch(e){showState('书友圈请求失败');var d=document.createElement('pre');d.className='debug';d.style.display='block';d.textContent='bookId='+bid+'\nCircleId='+circleId+'\n错误='+String(e);document.getElementById('wrap').appendChild(d)}}
 document.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='IMG')t.remove()},true);(function(){var pg=document.querySelector('.page');if(!pg)return;function sync(){var b=document.querySelector('.tabs-sticky');if(b)b.classList.toggle('scrolled',pg.scrollTop>6)}pg.addEventListener('scroll',sync,{passive:true});setTimeout(sync,0)})();var viewerList=[],viewerIdx=0;function showViewer(i){var v=document.getElementById('viewer'),im=document.getElementById('viewerImg'),c=document.getElementById('viewerCount');if(!v||!im||!viewerList.length)return;viewerIdx=(i+viewerList.length)%viewerList.length;im.src=viewerList[viewerIdx];if(c)c.textContent=viewerList.length>1?(viewerIdx+1)+' / '+viewerList.length:'';v.classList.add('on')}function hideViewer(){var v=document.getElementById('viewer');if(v)v.classList.remove('on')}document.addEventListener('click',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('img')){var card=t.closest('.imgs');viewerList=card?Array.prototype.slice.call(card.querySelectorAll('.img')).map(function(z){return z.src}):[t.src];showViewer(viewerList.indexOf(t.src));return}if(t&&(t.id==='viewer'||t.id==='viewerClose'))hideViewer()});document.addEventListener('click',function(e){var v=document.getElementById('viewer');if(!v||!v.classList.contains('on'))return;if(e.target&&e.target.id==='viewerImg'&&viewerList.length>1)showViewer(viewerIdx+1)});var dPostId='',dPg=1,dEnd=false,dLoading=false;
 var postIdFixCache={};
-function allIdCandidates(rounded){
-  var out=[];
-  try{
-    var base=BigInt(String(rounded||'').trim()),abs=base<0n?-base:base,bits=abs.toString(2).length,radius=bits>53?(1n<<BigInt(bits-53)):1n;
-    for(var d=0n;d<=radius;d++){out.push(String(base+d));if(d)out.push(String(base-d))}
-    var common=[],rest=[];out.forEach(function(v){var r=((BigInt(v)%256n)+256n)%256n;(r===0n||r===1n||r===2n?common:rest).push(v)});out=common.concat(rest);
-  }catch(e){out=[String(rounded||'')]}
-  return out.filter(function(v,i,a){return a.indexOf(v)===i});
-}
-async function resolveInBatches(rounded,probe){
-  var list=allIdCandidates(rounded),last='';
-  for(var i=0;i<list.length;i+=8){try{return await firstResolved(list.slice(i,i+8).map(probe))}catch(e){last=String(e&&e.message||e)}}
-  throw new Error(last||'ID校正失败');
-}
-async function probePostCandidate(postId){
-  var a=['appappend=1LkpFA','circleId='+circleId,'cursor=0','pg=1','postId='+postId,'pz=1','sort=0','topicId=0','useCursor=0'],ts=Date.now();
-  var u='https://magev6.if.qidian.com/argus/api/v1/circle/getpostdetail?'+a.join('&');
-  var raw=await httpText(u,mkHeaders(a,ts)),j=QDG_safeJson(quoteBigIds(raw))||{};
-  if(Number(j.Result)!==0)throw new Error(txt(j.Message)||String(j.Result));
-  var d=j.Data||{},topic=d.TopicData||{},shared=topic.ShareInfo&&topic.ShareInfo.SharedUrl?String(topic.ShareInfo.SharedUrl):'',m=shared.match(/[?&]postId=(\d+)/);
-  if(m&&m[1]!==postId)throw new Error('返回帖子ID不一致');
-  return postId;
-}
-async function firstResolved(tasks){
-  return await new Promise(function(resolve,reject){var pending=tasks.length,done=false,last='';if(!pending){reject(new Error('无候选'));return}tasks.forEach(function(p){Promise.resolve(p).then(function(v){if(!done){done=true;resolve(v)}}).catch(function(e){last=String(e&&e.message||e);pending--;if(!done&&pending<=0)reject(new Error(last||'候选均失败'))})})})
+function nearIdCandidates(v){
+  var s=rawId(v),out=[s];
+  try{var b=BigInt(s);out=[s,String(b+1n),String(b-1n),String(b+2n),String(b-2n)]}catch(e){}
+  return out.filter(function(x,i,a){return x&&a.indexOf(x)===i});
 }
 async function resolveExactPostId(roundedId){
-  var key=String(roundedId||'');if(postIdFixCache[key])return postIdFixCache[key];
-  var exact=await resolveInBatches(key,probePostCandidate);postIdFixCache[key]=exact;return exact;
+  var key=rawId(roundedId);
+  if(postIdFixCache[key])return postIdFixCache[key];
+  var exact=await firstResolved(nearIdCandidates(key).map(probePostCandidate));
+  postIdFixCache[key]=exact;return exact;
 }
 var dLoaded=0,subStates={};
 function atName(x){var a=x&&x.At||{};return txt(a.NickName||a.UserName||a.Name||'')}
@@ -555,7 +545,7 @@ async function probeReviewCandidate(reviewId,pg){
 }
 async function loadSubReplies(rounded,box,more){
   var key=String(rounded||''),st=subStates[key]||{id:'',pg:1,end:false,loading:false};if(st.loading||st.end)return;st.loading=true;subStates[key]=st;box.classList.add('on');
-  try{var r;if(!st.id){r=await resolveInBatches(key,function(id){return probeReviewCandidate(id,1)});st.id=r.id}else r=await probeReviewCandidate(st.id,st.pg);var arr=reviewRows(r.data);if(!more)box.innerHTML='';box.insertAdjacentHTML('beforeend',arr.map(subReplyHtml).join(''));st.end=!arr.length||arr.length<20;if(!st.end){st.pg++;box.insertAdjacentHTML('beforeend','<button class="sub-more" data-more="'+esc(key)+'">继续加载</button>')}}catch(e){box.innerHTML='<div class="empty">楼中楼加载失败</div>'}st.loading=false;
+  try{var r;if(!st.id){r=await firstResolved(nearIdCandidates(key).map(function(id){return probeReviewCandidate(id,1)}));st.id=r.id}else r=await probeReviewCandidate(st.id,st.pg);var arr=reviewRows(r.data);if(!more)box.innerHTML='';box.insertAdjacentHTML('beforeend',arr.map(subReplyHtml).join(''));st.end=!arr.length||arr.length<20;if(!st.end){st.pg++;box.insertAdjacentHTML('beforeend','<button class="sub-more" data-more="'+esc(key)+'">继续加载</button>')}}catch(e){box.innerHTML='<div class="empty">楼中楼加载失败</div>'}st.loading=false;
 }
 function closeDetail(){var v=document.getElementById('detail');if(v)v.classList.remove('on')}
 document.addEventListener('click',function(e){
