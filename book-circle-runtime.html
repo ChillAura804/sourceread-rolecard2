@@ -342,6 +342,18 @@ function mkHeaders(arr, ts){
   var qh = QDG_makeIOSQDH(ts);
   return { "user-agent":"QDReaderAppStore/5.9.474 (iPhone; iOS 15.2; Scale/3.00)", tstamp:String(ts), qdsign:qd, qdh:qh, accept:"application/json" };
 }
+function firstResolved(tasks){
+  return new Promise(function(resolve,reject){
+    var pending=tasks.length,done=false,last='';
+    if(!pending){reject(new Error('无候选'));return}
+    tasks.forEach(function(p){
+      Promise.resolve(p).then(function(v){if(!done){done=true;resolve(v)}}).catch(function(e){
+        last=String(e&&e.message||e);pending--;
+        if(!done&&pending<=0)reject(new Error(last||'候选均失败'));
+      });
+    });
+  });
+}
 
 
 
@@ -475,6 +487,13 @@ async function loadPosts(reset){if(loading||end)return;loading=true;var a=['book
 async function init(){if(!bid){showState('未获取到 bookId；请从书籍详情页或阅读页启动');return}showState('载入中…');try{await loadBookDetail();await loadCircleDetail()}catch(e){showState('书友圈请求失败');var d=document.createElement('pre');d.className='debug';d.style.display='block';d.textContent='bookId='+bid+'\nCircleId='+circleId+'\n错误='+String(e);document.getElementById('wrap').appendChild(d)}}
 document.addEventListener('error',function(e){var t=e.target;if(t&&t.tagName==='IMG')t.remove()},true);(function(){var pg=document.querySelector('.page');if(!pg)return;function sync(){var b=document.querySelector('.tabs-sticky');if(b)b.classList.toggle('scrolled',pg.scrollTop>6)}pg.addEventListener('scroll',sync,{passive:true});setTimeout(sync,0)})();var viewerList=[],viewerIdx=0;function showViewer(i){var v=document.getElementById('viewer'),im=document.getElementById('viewerImg'),c=document.getElementById('viewerCount');if(!v||!im||!viewerList.length)return;viewerIdx=(i+viewerList.length)%viewerList.length;im.src=viewerList[viewerIdx];if(c)c.textContent=viewerList.length>1?(viewerIdx+1)+' / '+viewerList.length:'';v.classList.add('on')}function hideViewer(){var v=document.getElementById('viewer');if(v)v.classList.remove('on')}document.addEventListener('click',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('img')){var card=t.closest('.imgs');viewerList=card?Array.prototype.slice.call(card.querySelectorAll('.img')).map(function(z){return z.src}):[t.src];showViewer(viewerList.indexOf(t.src));return}if(t&&(t.id==='viewer'||t.id==='viewerClose'))hideViewer()});document.addEventListener('click',function(e){var v=document.getElementById('viewer');if(!v||!v.classList.contains('on'))return;if(e.target&&e.target.id==='viewerImg'&&viewerList.length>1)showViewer(viewerIdx+1)});var dPostId='',dPg=1,dEnd=false,dLoading=false;
 var postIdFixCache={};
+async function probePostCandidate(postId){
+  var a=['appappend=1LkpFA','circleId='+circleId,'cursor=0','pg=1','postId='+postId,'pz=1','sort=0','topicId=0','useCursor=0'],ts=Date.now();
+  var u='https://magev6.if.qidian.com/argus/api/v1/circle/getpostdetail?'+a.join('&');
+  var raw=await httpText(u,mkHeaders(a,ts)),j=QDG_safeJson(raw)||{};
+  if(Number(j.Result)!==0)throw new Error(txt(j.Message)||String(j.Result));
+  return postId;
+}
 function nearIdCandidates(v){
   var s=rawId(v),out=[s];
   try{var b=BigInt(s);out=[s,String(b+1n),String(b-1n),String(b+2n),String(b-2n)]}catch(e){}
