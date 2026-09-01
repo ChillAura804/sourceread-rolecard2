@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<title>本书看点 v40</title>
+<title>本书看点 v41</title>
 <style>
 :root{color-scheme:light dark;--bg:#f5f5f7;--card:#ffffff;--text:#111827;--sub:#8b8f97;--line:rgba(0,0,0,.07);--primary:#3478f6;--chip:rgba(52,120,246,.10);--safeTop:env(safe-area-inset-top,0px);--safeBottom:env(safe-area-inset-bottom,0px);
   --card-w:min(90vw,680px);--card-h:min(calc(100dvh - 170px),820px);--deck-min:.1px;--stack:10px;}
@@ -30,7 +30,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 .state{flex:1;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:14px;text-align:center;line-height:1.8;padding:20px;}
 .hint{display:none;}
 /* 列表视图 */
-.panel{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;flex-direction:column;}
+.panel{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;flex-direction:column;}.panel>.sheet-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(22px) saturate(170%);transform:scale(1.12);opacity:.55;z-index:0;pointer-events:none;}.panel>.sheet-tint{position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 74%,transparent);z-index:1;pointer-events:none;}.panel>*{position:relative;z-index:2;}
 .panel.on{display:flex;}
 .panel-bar{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:4px;padding:calc(var(--safeTop) + 26px) 14px 14px;background:transparent;z-index:3;isolation:isolate;}.panel-bar:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 86%,transparent) 0%,color-mix(in srgb,var(--bg) 55%,transparent) 42%,color-mix(in srgb,var(--bg) 20%,transparent) 70%,transparent 100%);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 48%,rgba(0,0,0,.75) 70%,transparent 100%);mask-image:linear-gradient(to bottom,#000 0%,#000 48%,rgba(0,0,0,.75) 70%,transparent 100%);}
 .pbtn{appearance:none;border:0;background:transparent;color:var(--primary);font-size:15px;font-weight:700;padding:6px 8px;cursor:pointer;}
@@ -40,7 +40,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 .li-title{font-size:16px;font-weight:750;line-height:1.4;}
 .li-meta{font-size:12px;color:var(--sub);margin-top:5px;display:flex;gap:12px;flex-wrap:wrap;}
 .li-desc{font-size:13px;line-height:1.7;color:var(--text2);margin-top:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap;}.li-desc.open{-webkit-line-clamp:unset;display:block;}.li-more{appearance:none;border:0;background:transparent;color:var(--primary);font-size:12px;font-weight:700;padding:8px 2px 0;cursor:pointer;}
-.detail{position:fixed;inset:0;z-index:110;background:var(--bg);display:none;flex-direction:column;}
+.detail{position:fixed;inset:0;z-index:110;background:var(--bg);display:none;flex-direction:column;}.detail>.sheet-bg{position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(22px) saturate(170%);transform:scale(1.12);opacity:.55;z-index:0;pointer-events:none;}.detail>.sheet-tint{position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 74%,transparent);z-index:1;pointer-events:none;}.detail>*{position:relative;z-index:2;}
 .detail.on{display:flex;}
 .detail-bar{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:4px;padding:calc(var(--safeTop) + 26px) 14px 14px;background:transparent;z-index:3;isolation:isolate;}.detail-bar:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 86%,transparent) 0%,color-mix(in srgb,var(--bg) 55%,transparent) 42%,color-mix(in srgb,var(--bg) 20%,transparent) 70%,transparent 100%);-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 48%,rgba(0,0,0,.75) 70%,transparent 100%);mask-image:linear-gradient(to bottom,#000 0%,#000 48%,rgba(0,0,0,.75) 70%,transparent 100%);}
 .detail-scroll{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:72px 20px calc(var(--safeBottom) + 28px);}
@@ -58,10 +58,10 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
   <div class="top"><h1>本书看点</h1></div>
   <div class="deck" id="deck"></div>
 </div>
-<div class="panel" id="listPanel"><div class="panel-bar"><button class="pbtn" type="button" data-back="listPanel">‹ 返回</button><span class="ptitle" id="listTitle">全部书单</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="list" id="listBox"></div></div>
-<div class="detail" id="detailPanel"><div class="detail-bar"><button class="pbtn" type="button" data-back="detailPanel">‹ 返回</button><span class="ptitle">书单详情</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="detail-scroll" id="detailBox"></div></div>
+<div class="panel" id="listPanel"><div class="sheet-bg" id="listBg"></div><div class="sheet-tint"></div><div class="panel-bar"><button class="pbtn" type="button" data-back="listPanel">‹ 返回</button><span class="ptitle" id="listTitle">全部书单</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="list" id="listBox"></div></div>
+<div class="detail" id="detailPanel"><div class="sheet-bg" id="detailBg"></div><div class="sheet-tint"></div><div class="detail-bar"><button class="pbtn" type="button" data-back="detailPanel">‹ 返回</button><span class="ptitle">书单详情</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="detail-scroll" id="detailBox"></div></div>
 <script>
-var BUILD_ID="20260901185310";//20260901140433";//20260901134829";//20260901133502";//20260901132544";//20260901132051";//20260901131528";//20260901131208";//20260901130856";//20260901130655";//20260901130144";//20260901130046";//20260901125830";//20260901125038";//20260901124812";//20260901124528";//20260901123528";//20260901122021";//20260901121420";//20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
+var BUILD_ID="20260901191740";//20260901140433";//20260901134829";//20260901133502";//20260901132544";//20260901132051";//20260901131528";//20260901131208";//20260901130856";//20260901130655";//20260901130144";//20260901130046";//20260901125830";//20260901125038";//20260901124812";//20260901124528";//20260901123528";//20260901122021";//20260901121420";//20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
 
 function md5hex(str){
   function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
@@ -448,6 +448,7 @@ function detailHtml(x){
 
 var listCache=null,listEnd=false,listPg=1,listLoading=false;
 
+function firstBookCover(){var i,b=null;for(i=0;i<(listCache||[]).length;i++){var bs=listCache[i]&&listCache[i].Books;if(Array.isArray(bs)&&bs.length&&bs[0]&&bs[0].BookId){b=bs[0].BookId;break}}return b?coverUrlOf({BookId:b}):''}
 function coverUrlOf(x){return txt(x.BookId)?'https://bookcover.yuewen.com/qdbimg/349573/'+txt(x.BookId)+'/180.webp':''}
 function bookCardHtml(x){
   var title=txt(x.BookName||'未知书籍'),author=txt(x.BookAuthor||''),
@@ -468,6 +469,7 @@ function bookCardHtml(x){
 async function loadList(reset){
   if(listLoading)return;listLoading=true;
   var lp=document.getElementById('listPanel');if(lp)lp.classList.add('on');
+  var lbg=document.getElementById('listBg');if(lbg){var fc=firstBookCover();lbg.style.backgroundImage=fc?('url("'+fc+'")'):''}
   if(reset){var lb0=document.getElementById('listBox');if(lb0)lb0.innerHTML='<div class="state">加载中…</div>'}
   try{
     var fields=['bookId='+bid,'isRecommended=1','page='+(reset?1:listPg),'size=20','type=2'];
@@ -505,6 +507,7 @@ async function showDetailById(blid,fallback){
     var raw=await httpText(u,mkHeaders(a,ts)),j=QDG_safeJson(raw)||{};
     if(Number(j.Result)!==0)throw new Error(txt(j.Message)||'Result='+j.Result);
     var arr=Array.isArray(j.Data&&j.Data.Books)?j.Data.Books:[],head=detailHtml(j.Data||fallback||{});
+    var dbg=document.getElementById('detailBg');if(dbg){var fc=arr.length?coverUrlOf(arr[0]):'';dbg.style.backgroundImage=fc?('url("'+fc+'")'):''}
     var list='<div class="dtsub">收录书籍</div>'+(arr.length?arr.map(bookCardHtml).join(''):'<div class="state">暂无收录书籍</div>');
     document.getElementById('detailBox').innerHTML=head+list;
   }catch(e){
