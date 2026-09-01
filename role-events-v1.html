@@ -6,17 +6,17 @@
 .wrap{max-width:760px;margin:0 auto;padding:0 16px;}
 .groupTitle{font-size:13px;font-weight:700;color:var(--sub);letter-spacing:.3px;margin:18px 2px 9px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.roleCard{min-width:0;height:60px;box-sizing:border-box;display:flex;align-items:center;gap:10px;border:0;border-radius:16px;background:color-mix(in srgb,var(--card) 80%,transparent);color:var(--text);padding:11px;text-align:left;font:inherit;border:1px solid var(--line);overflow:hidden}
+.roleCard{min-width:0;height:60px;box-sizing:border-box;display:flex;align-items:center;gap:10px;border:0;border-radius:16px;background:color-mix(in srgb,var(--card) 62%,transparent);color:var(--text);padding:11px;text-align:left;font:inherit;border:1px solid var(--line);overflow:hidden}
 .roleCard:active{opacity:.7}
 .rcAva{width:36px;height:36px;border-radius:50%;flex:0 0 36px;object-fit:cover;background:rgba(127,127,127,.14)}
 .rcName{font-size:15px;font-weight:730;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rcPos{font-size:11px;color:var(--sub);margin-top:3px}
-.topRow{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;margin:-2px -2px 0;padding:calc(var(--safeTop) + 8px) 4px 12px;background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 94%,transparent) 0%,color-mix(in srgb,var(--bg) 60%,transparent) 40%,transparent 88%);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);}background:linear-gradient(to bottom,rgba(18,18,18,.82) 0%,rgba(18,18,18,.52) 42%,rgba(18,18,18,.18) 70%,rgba(18,18,18,0) 100%);}}
+.topRow{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;margin:-2px -2px 0;padding:calc(var(--safeTop) + 8px) 4px 12px;background:linear-gradient(to bottom,var(--bg) 0%,color-mix(in srgb,var(--bg) 62%,transparent) 36%,color-mix(in srgb,var(--bg) 26%,transparent) 60%,transparent 78%);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);}background:linear-gradient(to bottom,rgba(18,18,18,.82) 0%,rgba(18,18,18,.52) 42%,rgba(18,18,18,.18) 70%,rgba(18,18,18,0) 100%);}}
 .backBtn{border:0;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:999px;font-size:14px;font-weight:700;padding:8px 14px}.backBtn:active{opacity:.7}
 .curAva{width:38px;height:38px;border-radius:50%;flex:0 0 38px;object-fit:cover;background:rgba(127,127,127,.14)}.curRole{min-width:0;flex:1}.curName{font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.curPos{font-size:12px;color:var(--sub);margin-top:2px}
 .status{padding:60px 6px;color:var(--sub);font-size:14px;text-align:center;line-height:1.7}
 .event{position:relative;padding:0 0 16px 20px}.event:before{content:"";position:absolute;left:4px;top:22px;bottom:0;width:2px;background:var(--line)}.event:last-child:before{display:none}.event:after{content:"";position:absolute;left:0;top:9px;width:10px;height:10px;border-radius:50%;background:#3478f6}
-.eventCard{background:color-mix(in srgb,var(--card) 76%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.eventCard{background:color-mix(in srgb,var(--card) 58%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
 .eventTitle{font-size:16px;font-weight:750;line-height:1.5}.eventText{font-size:14px;line-height:1.7;color:var(--sub);margin-top:7px;white-space:pre-wrap}.eventMeta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--sub);margin-top:10px}.eventLikes{color:#3478f6;font-weight:650}
 .more{display:none;width:100%;border:0;border-radius:14px;background:var(--card);border:1px solid var(--line);color:#3478f6;font-size:15px;font-weight:700;padding:14px;margin-top:2px}.more.show{display:block}
 .pickBtn{border:0;background:var(--card);border:1px solid var(--line);color:#3478f6;border-radius:999px;font-size:14px;font-weight:700;padding:8px 14px}.pickBtn:active{opacity:.7}
@@ -40,7 +40,7 @@ body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,no
 
 body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,transparent);z-index:0;pointer-events:none;}
 .page{position:relative;z-index:1;}
-</style></head><body><div id="appBg" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;filter:blur(20px) saturate(160%);"></div><div id="appBgTint" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-color:rgba(127,127,140,.45);"></div>
+</style></head><body><div id="appBg" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;filter:blur(20px) saturate(160%);"></div><div id="appBgTint" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-color:rgba(16,18,28,.16);"></div>
 <div class="page"><div class="wrap" id="wrap"></div></div>
 <div class="overlay" id="overlay"><div class="overlayMask" id="overlayMask"></div><section class="panel"><div class="panelTop"><span class="panelTitle">选择角色</span><button class="panelClose" type="button" id="panelClose">关闭</button></div><div class="tabs" id="tabs"></div><div class="pickGrid" id="pickGrid"></div><div class="pageRow" id="pageRow"></div></section></div>
 <script>
