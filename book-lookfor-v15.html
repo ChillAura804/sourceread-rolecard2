@@ -1,7 +1,7 @@
 <!doctype html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<title>本书看点 v15</title>
+<title>本书看点 v16</title>
 <style>
 :root{color-scheme:light dark;--bg:#f5f5f7;--card:#ffffff;--text:#111827;--sub:#8b8f97;--line:rgba(0,0,0,.07);--primary:#3478f6;--chip:rgba(52,120,246,.10);--safeTop:env(safe-area-inset-top,0px);--safeBottom:env(safe-area-inset-bottom,0px);
   --card-w:min(90vw,680px);--card-h:min(calc(100dvh - 170px),820px);--deck-min:.1px;--stack:10px;}
@@ -61,7 +61,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 <div class="panel" id="listPanel"><div class="panel-bar"><button class="pbtn" type="button" data-back="listPanel">‹ 返回</button><span class="ptitle" id="listTitle">全部书单</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="list" id="listBox"></div></div>
 <div class="detail" id="detailPanel"><div class="detail-bar"><button class="pbtn" type="button" data-back="detailPanel">‹ 返回</button><span class="ptitle">书单详情</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="detail-scroll" id="detailBox"></div></div>
 <script>
-var BUILD_ID="20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
+var BUILD_ID="20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
 
 function md5hex(str){
   function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
@@ -544,7 +544,7 @@ async function showDetailById(blid,fallback){
     var u='https://magev6.if.qidian.com/argus/api/v1/booklist/getBookListDetail?'+a.join('&');
     var raw=await httpText(u,mkHeaders(a,ts)),j=QDG_safeJson(raw)||{};
     if(Number(j.Result)!==0)throw new Error(txt(j.Message)||'Result='+j.Result);
-    var arr=Array.isArray(j.Data&&j.Data.Books)?j.Data.Books:[],head=fallback?detailHtml(fallback):'';
+    var arr=Array.isArray(j.Data&&j.Data.Books)?j.Data.Books:[],head=detailHtml(j.Data||fallback||{});
     var list='<div class="dtsub">收录书籍</div>'+(arr.length?arr.map(bookCardHtml).join(''):'<div class="state">暂无收录书籍</div>');
     document.getElementById('detailBox').innerHTML=head+list;
   }catch(e){

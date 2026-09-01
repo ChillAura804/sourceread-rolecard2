@@ -1,10 +1,10 @@
 <!doctype html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<title>本书看点 v10</title>
+<title>本书看点 v16</title>
 <style>
 :root{color-scheme:light dark;--bg:#f5f5f7;--card:#ffffff;--text:#111827;--sub:#8b8f97;--line:rgba(0,0,0,.07);--primary:#3478f6;--chip:rgba(52,120,246,.10);--safeTop:env(safe-area-inset-top,0px);--safeBottom:env(safe-area-inset-bottom,0px);
-  --card-w:min(90vw,680px);--card-h:min(80vh,820px);--stack:10px;}
+  --card-w:min(90vw,680px);--card-h:min(calc(100dvh - 170px),820px);--deck-min:.1px;--stack:10px;}
 @media (prefers-color-scheme:dark){:root{--bg:#111217;--card:#1c1c1e;--text:#f5f5f7;--sub:#a1a1aa;--line:rgba(255,255,255,.09);--chip:rgba(116,163,255,.16);}}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;height:100%;overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;width:100%;}
 *{box-sizing:border-box;box-sizing:border-box;}
@@ -36,7 +36,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 .pbtn{appearance:none;border:0;background:transparent;color:var(--primary);font-size:15px;font-weight:700;padding:6px 8px;cursor:pointer;}
 .ptitle{flex:1;text-align:center;font-size:16px;font-weight:800;}
 .list{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 16px calc(var(--safeBottom) + 24px);}
-.list-item{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:12px;cursor:pointer;}
+.list-item{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px 16px;margin-bottom:12px;cursor:pointer;}.li-row{display:flex;align-items:center;gap:11px;}.li-ava{width:40px;height:40px;border-radius:50%;object-fit:cover;flex:0 0 40px;background:var(--chip);}.book-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);}.book-cover{width:58px;height:78px;border-radius:8px;overflow:hidden;flex:0 0 58px;background:var(--chip);}.book-cover img{width:100%;height:100%;object-fit:cover;display:block;}.book-info{min-width:0;flex:1;}.book-name{font-size:15px;font-weight:750;line-height:1.4;}.book-author{font-size:12px;color:var(--sub);margin-top:4px;}.book-desc{font-size:12.5px;line-height:1.6;color:var(--text2);margin-top:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}.book-foot{font-size:11px;color:var(--sub);margin-top:6px;}.book-intro{font-size:12px;line-height:1.6;color:var(--primary);margin-top:6px;}.dtsub{font-size:13px;font-weight:750;color:var(--text);margin:2px 2px 8px;}
 .li-title{font-size:16px;font-weight:750;line-height:1.4;}
 .li-meta{font-size:12px;color:var(--sub);margin-top:5px;display:flex;gap:12px;flex-wrap:wrap;}
 .li-desc{font-size:13px;line-height:1.6;color:var(--text2);margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
@@ -61,7 +61,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 <div class="panel" id="listPanel"><div class="panel-bar"><button class="pbtn" type="button" data-back="listPanel">‹ 返回</button><span class="ptitle" id="listTitle">全部书单</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="list" id="listBox"></div></div>
 <div class="detail" id="detailPanel"><div class="detail-bar"><button class="pbtn" type="button" data-back="detailPanel">‹ 返回</button><span class="ptitle">书单详情</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="detail-scroll" id="detailBox"></div></div>
 <script>
-var BUILD_ID="20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
+var BUILD_ID="20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
 
 function md5hex(str){
   function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
@@ -438,19 +438,27 @@ function cardHtml(x){
     '<div class="card-all" data-all="1">全部 '+looks.length+' 条书单<span class="arr">›</span></div></article>';
 }
 function listItemHtml(x){
-  var title=txt(x.Title||x.SubTitle||''),body=txt(x.Body||''),name=txt(x.UserName);
-  return '<div class="list-item" data-idx="'+looks.indexOf(x)+'"><div class="li-title">'+esc(title)+'</div>'+
-    '<div class="li-meta"><span>'+esc(name||'匿名')+'</span><span>'+(Number(x.TotalCount||0)||0)+' 本</span><span>赞 '+(Number(x.LikeCount||0)||0)+'</span></div>'+
+  var blid=txt(x.Id||''),title=txt(x.Name||''),name=txt(x.AuthorName||''),
+      body=txt(x.Des||''),ava=txt(x.AuthorHeadImg||''),
+      total=Number(x.BookCount||0)||0,col=Number(x.CollectCount||0)||0;
+  return '<div class="list-item" data-blid="'+esc(blid)+'">'+
+    '<div class="li-row">'+(ava?'<img class="li-ava" src="'+esc(ava)+'" loading="lazy" referrerpolicy="no-referrer">':'<span class="li-ava"></span>')+
+    '<div style="min-width:0;flex:1"><div class="li-title">'+esc(title||'未知书单')+'</div>'+
+    '<div class="li-meta"><span>'+esc(name||'匿名')+'</span>'+(total?'<span>'+total+' 本</span>':'')+(col?'<span>收藏 '+col+'</span>':'')+'</div></div><span class="card-arrow">›</span></div>'+
     (body?'<div class="li-desc">'+esc(body)+'</div>':'')+'</div>';
 }
 function detailHtml(x){
-  var title=txt(x.Title||x.SubTitle||''),body=txt(x.Body||''),name=txt(x.UserName),ava=txt(x.UserHeadIcon);
-  return '<div class="dt-head"><span class="dt-cat">'+esc(x.ModelName||'书单')+'</span>'+
-    '<div class="dt-title">'+esc(title)+'</div>'+
+  var title=txt(x.Name||x.Title||x.SubTitle||''),body=txt(x.Des||x.Body||''),name=txt(x.AuthorName||x.UserName||''),ava=txt(x.AuthorHeadImg||x.UserHeadIcon||'');
+  return '<div class="dt-head"><span class="dt-cat">书单</span>'+
+    '<div class="dt-title">'+esc(title||'未知书单')+'</div>'+
     '<div class="dt-meta">'+(ava?'<img class="dt-ava" src="'+esc(ava)+'" referrerpolicy="no-referrer">':'')+
     '<span class="dt-name">'+esc(name||'匿名')+'</span>'+
-    '<span class="dt-stat">'+(Number(x.TotalCount||0)||0)+' 本</span>'+
-    '<span class="dt-stat"><svg viewBox="0 0 24 24"><path d="M7 21V10.2L12.2 3c.9 0 1.7.8 1.7 1.8L13 9.2h6.1c1.1 0 2 .9 1.8 2l-1.4 8c-.1.9-.9 1.6-1.8 1.6H7z"/></svg>'+(Number(x.LikeCount||0)||0)+'</span></div></div>'+
+    '<span class="dt-stat">'+(Number(x.BookCount||0)||0)+' 本</span>'+
+    '<span class="dt-stat">收藏 '+(Number(x.CollectCount||0)||0)+'</span>'+
+    (Number(x.FlowerCount||0)?'<span class="dt-stat">花 '+(Number(x.FlowerCount||0))+'</span>':'')+
+    (Number(x.FollowCount||0)?'<span class="dt-stat">关注 '+(Number(x.FollowCount||0))+'</span>':'')+
+    (Number(x.CommentCount||0)?'<span class="dt-stat">评论 '+(Number(x.CommentCount||0))+'</span>':'')+
+    '</div></div>'+
     '<div class="dt-body">'+esc(body||'暂无简介')+'</div>';
 }
 function showList(){
@@ -459,6 +467,28 @@ function showList(){
   p.classList.add('on');
 }
 var listCache=null,listEnd=false,listPg=1,listLoading=false;
+
+function firstStr(x,keys){var s='';keys.forEach(function(k){if(!s&&x&&k in x&&x[k]!=null&&String(x[k]).trim())s=String(x[k])});return s}
+function coverUrl(x){return firstStr(x,['Image','BookCover','Cover','ImageUrl','ImgUrl','BookImageUrl','Icon'])}
+function blidOf(x){var v=firstStr(x,['BookListId','bookListId','Id','id','IdStr']);return v}
+function commentCount(x){var n=firstStr(x,['CommentCount','ReviewCount','CommentNum','CommentTotal']);return n?Number(n):0}
+function coverUrlOf(x){return txt(x.BookId)?'https://bookcover.yuewen.com/qdbimg/349573/'+txt(x.BookId)+'/180.webp':''}
+function bookCardHtml(x){
+  var title=txt(x.BookName||'未知书籍'),author=txt(x.BookAuthor||''),
+      cat=txt(x.CategoryName||''),brief=txt(x.BookBriefWords||''),intro=txt(x.BookIntroWords||''),
+      fav=Number(x.BeFavoredCount||0)||0,words=Number(x.WordsCount||0)||0,img=coverUrlOf(x);
+  var desc=brief||intro;
+  return '<div class="book-item">'+
+    (img?'<div class="book-cover"><img src="'+esc(img)+'" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()"></div>':'')+
+    '<div class="book-info" style="flex:1;min-width:0">'+
+    '<div class="book-name">'+esc(title)+'</div>'+
+    '<div class="book-author">'+(author?esc(author)+' · ':'')+(cat?esc(cat):'')+(words?' · '+words+'字':'')+'</div>'+
+    (desc?'<div class="book-desc">'+esc(desc)+'</div>':'')+
+    (intro&&brief?'<div class="book-intro">推荐语：'+esc(intro)+'</div>':'')+
+    (fav?'<div class="book-foot">收藏 '+fav+'</div>':'')+
+    '</div></div>';
+}
+
 function adaptiveListTitle(x){var s='';Object.keys(x).forEach(function(k){if(!s&&/title|name|Name/.test(k)&&typeof x[k]==='string'&&x[k])s=x[k]});return s||'条目'}
 function adaptiveListMeta(x){var parts=[];Object.keys(x).forEach(function(k){if(/author|Author|user|User/.test(k)&&typeof x[k]==='string'&&x[k])parts.push(x[k])});return parts.join(' · ')}
 function itemsFrom(data){
@@ -494,7 +524,7 @@ async function loadList(reset){
     if(!raw)raw=await httpText(url+'?'+body,headers);
     var j=QDG_safeJson(raw)||{};
     if(Number(j.Result)!==0)throw new Error(txt(j.Message)||'Result='+j.Result);
-    listCache=itemsFrom(j.Data||j);listEnd=!listCache.length;
+    listCache=Array.isArray(j.Data&&j.Data.BookLists)?j.Data.BookLists:[];listEnd=!listCache.length;
     document.getElementById('listBox').innerHTML=listCache.length?listHtmlFrom(listCache):('<div class="state">暂无书单数据<br><span style="font-size:10px;color:var(--sub)">'+esc(raw.slice(0,400))+'</span></div>');
     document.getElementById('listTitle').textContent='全部书单 '+listCache.length+' 条';
   }catch(e){
@@ -502,24 +532,26 @@ async function loadList(reset){
   }
   listLoading=false;
 }
-async function showDetail(i){
-  var p=document.getElementById('detailPanel'),x=looks[i];if(!p||!x)return;
+async function showDetailById(blid,fallback){
+  var p=document.getElementById('detailPanel');if(!p)return;
   document.getElementById('detailBox').innerHTML='<div class="state">加载中…</div>';
   document.getElementById('detailBox').scrollTop=0;
   p.classList.add('on');
+  var blidStr=txt(blid||'');
   try{
-    var a=['bookListId='+txt(x.Id||x.IdStr||''),'page=1','selectedBookId=0','size=20'],ts=Date.now();
+    if(!blidStr)throw new Error('缺少书单ID');
+    var a=['bookListId='+blidStr,'page=1','selectedBookId=0','size=20'],ts=Date.now();
     var u='https://magev6.if.qidian.com/argus/api/v1/booklist/getBookListDetail?'+a.join('&');
     var raw=await httpText(u,mkHeaders(a,ts)),j=QDG_safeJson(raw)||{};
     if(Number(j.Result)!==0)throw new Error(txt(j.Message)||'Result='+j.Result);
-    var arr=itemsFrom(j.Data||j);
-    var head=detailHtml(x);
-    var list=arr.length?listHtmlFrom(arr):'<div class="state">暂无收录书籍</div>';
-    document.getElementById('detailBox').innerHTML=head+'<div style="margin-top:18px" class="dtsub">收录书籍</div>'+list;
+    var arr=Array.isArray(j.Data&&j.Data.Books)?j.Data.Books:[],head=detailHtml(j.Data||fallback||{});
+    var list='<div class="dtsub">收录书籍</div>'+(arr.length?arr.map(bookCardHtml).join(''):'<div class="state">暂无收录书籍</div>');
+    document.getElementById('detailBox').innerHTML=head+list;
   }catch(e){
     document.getElementById('detailBox').innerHTML='<div class="state">书单详情加载失败<br><span style="font-size:11px">'+esc(String(e&&e.message||e))+'</span></div>';
   }
 }
+function showCardDetail(i){var x=looks[i];if(x)showDetailById(x.Id||x.IdStr,x)}
 function closePanel(id){var p=document.getElementById(id);if(p)p.classList.remove('on')}
 function bindClicks2(){
   var lb=document.getElementById('listBox');
@@ -529,9 +561,9 @@ function bindClicks2(){
 function bindClicks(){
   document.addEventListener('click',function(e){
     var b=e.target&&e.target.closest?e.target.closest('[data-back]'):null;if(b){closePanel(b.getAttribute('data-back'));return}
-    var dt=e.target&&e.target.closest?e.target.closest('[data-detail]'):null;if(dt){showDetail(Number(dt.getAttribute('data-detail'))||0);return}
+    var dt=e.target&&e.target.closest?e.target.closest('[data-detail]'):null;if(dt){showCardDetail(Number(dt.getAttribute('data-detail'))||0);return}
     var al=e.target&&e.target.closest?e.target.closest('[data-all]'):null;if(al){listLoading=false;loadList(true);return}
-    var it=e.target&&e.target.closest?e.target.closest('.list-item'):null;if(it&&it.getAttribute('data-idx')!==null)showDetail(Number(it.getAttribute('data-idx'))||0);
+    var it=e.target&&e.target.closest?e.target.closest('.list-item'):null;if(it&&it.getAttribute('data-blid'))showDetailById(it.getAttribute('data-blid'),null);
   });
 }
 function layout(){
