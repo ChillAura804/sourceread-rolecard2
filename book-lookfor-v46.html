@@ -498,6 +498,8 @@ async function loadList(reset){
 }
 async function showDetailById(blid,fallback){
   var p=document.getElementById('detailPanel');if(!p)return;
+  var lp=document.getElementById('listPanel');
+  if(lp)lp.classList.remove('on');
   document.getElementById('detailBox').innerHTML='<div class="state">加载中…</div>';
   p.scrollTop=0;
   p.classList.add('on');document.body.classList.add('book-layer-open');bindTopBlur(p);
