@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
-<title>角色大事件</title>
+<title>角色大事件 v3</title>
 <style>
 :root{color-scheme:light dark;--bg:#f5f5f7;--card:rgba(255,255,255,.9);--text:#111827;--sub:#8b8f97;--line:rgba(0,0,0,.06);--mask:rgba(0,0,0,.18);--safeTop:env(safe-area-inset-top,0px);--safeBottom:env(safe-area-inset-bottom,0px);}@media (prefers-color-scheme: dark){:root{--bg:#111217;--card:rgba(28,28,30,.88);--text:#f5f5f7;--sub:#a1a1aa;--line:rgba(255,255,255,.08);--mask:rgba(0,0,0,.42);}}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Helvetica,Arial,sans-serif;height:100%;overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;width:100%;}.page{height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding:calc(var(--safeTop) + 78px) 0 calc(var(--safeBottom) + 22px);position:relative;overscroll-behavior:contain;touch-action:pan-y;}.wrap{max-width:760px;margin:0 auto;padding:0 14px;overflow-x:hidden;}.list{padding:2px 0 0;}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px;}
@@ -11,20 +11,20 @@
 .rcAva{width:36px;height:36px;border-radius:50%;flex:0 0 36px;object-fit:cover;background:rgba(127,127,127,.14)}
 .rcName{font-size:15px;font-weight:730;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rcPos{font-size:11px;color:var(--sub);margin-top:3px}
-.topRow{position:fixed;left:0;right:0;top:0;z-index:80;display:flex;align-items:center;gap:10px;margin:0;padding:calc(var(--safeTop) + 12px) 18px 26px;background:transparent;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);}
+.topRow{position:fixed;left:0;right:0;top:0;z-index:80;display:flex;align-items:center;gap:10px;margin:0;padding:calc(var(--safeTop) + 10px) 18px 18px;box-sizing:border-box;background:transparent;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);}
 .backBtn{border:0;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:999px;font-size:14px;font-weight:700;padding:8px 14px}.backBtn:active{opacity:.7}
 .curAva{width:38px;height:38px;border-radius:50%;flex:0 0 38px;object-fit:cover;background:rgba(127,127,127,.14)}.curRole{min-width:0;flex:1}.curName{font-size:17px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.curPos{font-size:12px;color:var(--sub);margin-top:2px}
 .status{padding:60px 6px;color:var(--sub);font-size:14px;text-align:center;line-height:1.7}
 .event{position:relative;padding:0 0 16px 20px}.event:before{content:"";position:absolute;left:4px;top:22px;bottom:0;width:2px;background:var(--line)}.event:last-child:before{display:none}.event:after{content:"";position:absolute;left:0;top:9px;width:10px;height:10px;border-radius:50%;background:#3478f6}
 .eventCard{background:color-mix(in srgb,var(--card) 58%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
 .eventTitle{font-size:16px;font-weight:750;line-height:1.5}.eventText{font-size:14px;line-height:1.7;color:var(--sub);margin-top:7px;white-space:pre-wrap}.eventMeta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--sub);margin-top:10px}.eventLikes{color:#3478f6;font-weight:650}
-.more{display:none;width:100%;border:0;border-radius:14px;background:var(--card);border:1px solid var(--line);color:#3478f6;font-size:15px;font-weight:700;padding:14px;margin-top:2px}.more.show{display:block}
+.more{display:none!important}
 .pickBtn{border:0;background:transparent;color:#3478f6;font-size:14px;font-weight:750;padding:8px 12px;border-radius:999px;-webkit-tap-highlight-color:transparent;}.pickBtn:active{opacity:.7}
 .overlay{position:fixed;inset:0;z-index:60;display:none}
 .overlay.show{display:block}
-.overlayMask{position:absolute;inset:0;background:rgba(0,0,0,.36)}
-.panel{position:absolute;left:0;right:0;bottom:0;height:100%;max-height:100%;background:var(--bg);border-radius:22px 22px 0 0;padding:calc(var(--safeTop) + 30px) 16px calc(var(--safeBottom) + 16px);box-sizing:border-box;display:flex;flex-direction:column;gap:10px;overflow:hidden}
-.panelTop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.overlayMask{position:absolute;inset:0;background:transparent}
+.panel{position:absolute;left:0;right:0;bottom:0;height:100%;max-height:100%;background:transparent;border-radius:0;padding:calc(var(--safeTop) + 18px) 16px calc(var(--safeBottom) + 16px);box-sizing:border-box;display:flex;flex-direction:column;gap:10px;overflow:hidden;isolation:isolate}.panel:before{content:"";position:fixed;inset:0;background-image:var(--page-bg,none);background-size:cover;background-position:center;filter:blur(24px) saturate(170%);transform:scale(1.12);opacity:.5;z-index:0;pointer-events:none}.panel:after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 66%,transparent);z-index:1;pointer-events:none}.panel>*{position:relative;z-index:2}
+.panelTop{display:none}
 .panelTitle{font-size:18px;font-weight:800}
 .panelClose{border:0;background:transparent;color:#3478f6;font-size:15px;font-weight:700;padding:6px 2px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
@@ -513,6 +513,7 @@ async function loadRoles(){
     var first=rolesAll.filter(function(r){return tabOf(r)==='主线'})[0]||rolesAll[0];choose(first,roleAvatar(first))
   }catch(e){statusView('角色列表请求失败');debug('bookId='+bid+'\\nURL='+lastUrl+'\\n错误='+String(e)+'\\n原始返回='+String(t).slice(0,3000))}
 }
+(function(){var pg=document.querySelector('.page');if(!pg)return;pg.addEventListener('scroll',function(){if(loading||end)return;if(pg.scrollTop+pg.clientHeight>=pg.scrollHeight-500)loadMore()},{passive:true})})();
 document.getElementById('overlayMask').onclick=closeOverlay;document.getElementById('panelClose').onclick=closeOverlay;window.addEventListener('resize',schedulePickerLayout,{passive:true});if(window.visualViewport)window.visualViewport.addEventListener('resize',schedulePickerLayout,{passive:true});
 loadRoles();
 
