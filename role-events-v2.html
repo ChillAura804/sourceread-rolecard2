@@ -1,6 +1,6 @@
 <!doctype html><html><head><meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"/>
-<title>角色大事件 v3</title>
+<title>角色大事件 v4</title>
 <style>
 :root{color-scheme:light dark;--bg:#f5f5f7;--card:rgba(255,255,255,.9);--text:#111827;--sub:#8b8f97;--line:rgba(0,0,0,.06);--mask:rgba(0,0,0,.18);--safeTop:env(safe-area-inset-top,0px);--safeBottom:env(safe-area-inset-bottom,0px);}@media (prefers-color-scheme: dark){:root{--bg:#111217;--card:rgba(28,28,30,.88);--text:#f5f5f7;--sub:#a1a1aa;--line:rgba(255,255,255,.08);--mask:rgba(0,0,0,.42);}}html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Helvetica,Arial,sans-serif;height:100%;overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;width:100%;}.page{height:100%;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding:calc(var(--safeTop) + 78px) 0 calc(var(--safeBottom) + 22px);position:relative;overscroll-behavior:contain;touch-action:pan-y;}.wrap{max-width:760px;margin:0 auto;padding:0 14px;overflow-x:hidden;}.list{padding:2px 0 0;}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px;}
@@ -20,7 +20,7 @@
 .eventTitle{font-size:16px;font-weight:750;line-height:1.5}.eventText{font-size:14px;line-height:1.7;color:var(--sub);margin-top:7px;white-space:pre-wrap}.eventMeta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--sub);margin-top:10px}.eventLikes{color:#3478f6;font-weight:650}
 .more{display:none!important}
 .pickBtn{border:0;background:transparent;color:#3478f6;font-size:14px;font-weight:750;padding:8px 12px;border-radius:999px;-webkit-tap-highlight-color:transparent;}.pickBtn:active{opacity:.7}
-.overlay{position:fixed;inset:0;z-index:60;display:none}
+.overlay{position:fixed;inset:0;z-index:90;display:none}
 .overlay.show{display:block}
 .overlayMask{position:absolute;inset:0;background:transparent}
 .panel{position:absolute;left:0;right:0;bottom:0;height:100%;max-height:100%;background:transparent;border-radius:0;padding:calc(var(--safeTop) + 18px) 16px calc(var(--safeBottom) + 16px);box-sizing:border-box;display:flex;flex-direction:column;gap:10px;overflow:hidden;isolation:isolate}.panel:before{content:"";position:fixed;inset:0;background-image:var(--page-bg,none);background-size:cover;background-position:center;filter:blur(24px) saturate(170%);transform:scale(1.12);opacity:.5;z-index:0;pointer-events:none}.panel:after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 66%,transparent);z-index:1;pointer-events:none}.panel>*{position:relative;z-index:2}
@@ -40,6 +40,7 @@ body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,no
 
 body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,transparent);z-index:0;pointer-events:none;}
 .page{position:relative;z-index:1;}
+.role-picker-open .page,.role-picker-open .topRow{visibility:hidden!important;}
 </style></head><body><div id="appBg" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;filter:blur(20px) saturate(160%);"></div><div id="appBgTint" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-color:rgba(16,18,28,.16);"></div>
 <div class="page"><div class="wrap" id="wrap"></div></div>
 <div class="overlay" id="overlay"><div class="overlayMask" id="overlayMask"></div><section class="panel"><div class="panelTop"><span class="panelTitle">选择角色</span><button class="panelClose" type="button" id="panelClose">关闭</button></div><div class="tabs" id="tabs"></div><div class="pickGrid" id="pickGrid"></div><div class="pageRow" id="pageRow"></div></section></div>
@@ -424,8 +425,8 @@ function schedulePickerLayout(){
   if(pickerResizeTimer)clearTimeout(pickerResizeTimer);
   pickerResizeTimer=setTimeout(function(){pickerResizeTimer=0;syncPickerLayout()},40)
 }
-function openOverlay(){if(loading||!rolesAll.length)return;if(selected){var cur=rolesAll.filter(function(r){return String(r.RoleName||'')===selected.name})[0];if(cur)pickTab=tabOf(cur)}renderTabs();document.getElementById('overlay').classList.add('show');renderPickGrid();syncPickerLayout();requestAnimationFrame(syncPickerLayout)}
-function closeOverlay(){document.getElementById('overlay').classList.remove('show')}
+function openOverlay(){if(loading||!rolesAll.length)return;if(selected){var cur=rolesAll.filter(function(r){return String(r.RoleName||'')===selected.name})[0];if(cur)pickTab=tabOf(cur)}renderTabs();document.body.classList.add('role-picker-open');document.getElementById('overlay').classList.add('show');renderPickGrid();syncPickerLayout();requestAnimationFrame(syncPickerLayout)}
+function closeOverlay(){document.getElementById('overlay').classList.remove('show');document.body.classList.remove('role-picker-open')}
 // ===== 事件时间线（整页）=====
 function eventsShell(name,pos,avatar){
   var w=wrap();w.innerHTML='';
