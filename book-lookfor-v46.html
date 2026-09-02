@@ -42,7 +42,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 .li-meta{font-size:12px;color:var(--sub);margin-top:5px;display:flex;gap:12px;flex-wrap:wrap;}
 .li-desc{font-size:13px;line-height:1.7;color:var(--text2);margin-top:8px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap;}.li-desc.open{-webkit-line-clamp:unset;display:block;}.li-more{appearance:none;border:0;background:transparent;color:var(--primary);font-size:12px;font-weight:700;padding:8px 2px 0;cursor:pointer;}
 .detail{position:fixed;inset:0;z-index:110;background:transparent;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;isolation:isolate;-webkit-overflow-scrolling:touch;}.detail:before{content:"";position:fixed;inset:0;background-image:var(--detail-bg,none);background-size:cover;background-position:center;filter:blur(24px) saturate(170%);transform:scale(1.12);opacity:.5;z-index:0;pointer-events:none;}.detail:after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 66%,transparent);z-index:1;pointer-events:none;}.detail>.detail-scroll{z-index:2;}.detail>.book-top{z-index:3;}
-.detail.on{display:flex;}
+.detail.on{display:flex;z-index:120;}
 
 .detail-scroll{position:relative;z-index:2;flex:0 0 auto;overflow:visible;padding:0 20px calc(var(--safeBottom) + 28px);}
 .dt-head{padding:6px 0 16px;border-bottom:1px solid var(--line);}
@@ -62,7 +62,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 <div class="panel" id="listPanel"><div class="book-top"><button class="pbtn" type="button" data-back="listPanel">‹ 返回</button><span class="ptitle" id="listTitle">全部书单</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="list" id="listBox"></div></div>
 <div class="detail" id="detailPanel"><div class="book-top"><button class="pbtn" type="button" data-back="detailPanel">‹ 返回</button><span class="ptitle">书单详情</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="detail-scroll" id="detailBox"></div></div>
 <script>
-var BUILD_ID="20260902101421";//20425";//20424";//14809";//14314";//13951";//13542";//12340";//12306";//11914";//11749";//11657";//11211";//20260901140433";//20260901134829";//20260901133502";//20260901132544";//20260901132051";//20260901131528";//20260901131208";//20260901130856";//20260901130655";//20260901130144";//20260901130046";//20260901125830";//20260901125038";//20260901124812";//20260901124528";//20260901123528";//20260901122021";//20260901121420";//20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
+var BUILD_ID="20260902222036";//20425";//20424";//14809";//14314";//13951";//13542";//12340";//12306";//11914";//11749";//11657";//11211";//20260901140433";//20260901134829";//20260901133502";//20260901132544";//20260901132051";//20260901131528";//20260901131208";//20260901130856";//20260901130655";//20260901130144";//20260901130046";//20260901125830";//20260901125038";//20260901124812";//20260901124528";//20260901123528";//20260901122021";//20260901121420";//20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
 
 function md5hex(str){
   function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
@@ -499,7 +499,7 @@ async function loadList(reset){
 async function showDetailById(blid,fallback){
   var p=document.getElementById('detailPanel');if(!p)return;
   var lp=document.getElementById('listPanel');
-  if(lp)lp.classList.remove('on');
+  if(lp){lp.classList.remove('on');lp.style.display='none';lp.style.setProperty('--panel-bg','none');}
   document.getElementById('detailBox').innerHTML='<div class="state">加载中…</div>';
   p.scrollTop=0;
   p.classList.add('on');document.body.classList.add('book-layer-open');bindTopBlur(p);
@@ -528,7 +528,7 @@ function bindTopBlur(scroller){
   scroller.addEventListener('scroll',sync,{passive:true});
   sync();
 }
-function closePanel(id){var p=document.getElementById(id);if(p)p.classList.remove('on');if(!document.querySelector('.panel.on,.detail.on'))document.body.classList.remove('book-layer-open')}
+function closePanel(id){var p=document.getElementById(id);if(p){p.classList.remove('on');if(id==='listPanel')p.style.display='';}if(!document.querySelector('.panel.on,.detail.on'))document.body.classList.remove('book-layer-open')}
 function bindClicks2(){
   var lb=document.getElementById('listBox');
   var lp=document.getElementById('listPanel');if(lp)lp.addEventListener('scroll',function(){if(lp.scrollTop+lp.clientHeight>=lp.scrollHeight-300&&!listEnd&&!listLoading){listPg++;loadList(false)}},{passive:true});
