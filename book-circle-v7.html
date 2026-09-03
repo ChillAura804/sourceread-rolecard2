@@ -3,7 +3,7 @@
 .filter-fixed{display:flex;align-items:center;gap:6px;flex:0 0 auto;min-width:0;position:relative;z-index:40;}.filter-right{display:flex;align-items:center;flex:0 0 auto;position:relative;z-index:40;padding-left:6px;}
 .filter-scroll{display:flex;align-items:center;gap:6px;flex:1 1 auto;min-width:0;overflow-x:auto;overflow-y:hidden;padding:0 2px 2px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x;}
 .filter-scroll::-webkit-scrollbar{display:none;}
-.filter-pop{position:absolute;z-index:100;min-width:76px;padding:6px;background:color-mix(in srgb,var(--card) 72%,transparent);border:1px solid color-mix(in srgb,var(--border) 55%,transparent);border-radius:14px;box-shadow:0 10px 26px rgba(0,0,0,.12);display:none;-webkit-backdrop-filter:blur(20px) saturate(170%);backdrop-filter:blur(20px) saturate(170%);}
+.filter-pop{position:absolute;z-index:100;min-width:76px;padding:6px;background:color-mix(in srgb,var(--card) 42%,transparent);border:1px solid color-mix(in srgb,var(--border) 45%,transparent);border-radius:14px;box-shadow:0 8px 22px rgba(0,0,0,.10);display:none;-webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%);}
 .filter-pop.on{display:block;}
 .filter-pop .sort-opt{appearance:none;border:0;background:transparent;color:var(--text);width:100%;display:block;padding:9px 11px;border-radius:10px;font-size:12px;font-weight:600;text-align:left;cursor:pointer;box-sizing:border-box;}
 .filter-pop .sort-opt.on{background:color-mix(in srgb,var(--primary) 14%,transparent);color:var(--primary);}
@@ -31,7 +31,8 @@
 .skel-ava{width:40px;height:40px;border-radius:50%;flex:0 0 40px;}
 .skel-reply{background:color-mix(in srgb,var(--card) 58%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-radius:16px;box-shadow:0 2px 9px rgba(0,0,0,.055);padding:14px;margin:0 0 12px;}
 </style></head><body><main class="page"><div class="wrap" id="wrap"></div></main><div class="detail" id="detail"><div class="detail-scroll" id="detailScroll"><div class="detail-bar" id="detailBar"><button class="detail-back" id="detailBack" type="button">‹ 返回</button><span class="detail-title" id="detailTitle">回复</span><span aria-hidden="true"></span></div><div id="detailContent"></div></div></div><div class="viewer" id="viewer"><button class="viewer-close" id="viewerClose" type="button" aria-label="关闭">✕</button><img id="viewerImg" alt=""><div class="viewer-count" id="viewerCount"></div></div><script>
-var BUILD_ID="20260903103424";//20260903094146
+var BUILD_ID="20260903173634";//20260903103424
+//20260903094146
 //20260903091716
 //20260902224700
 function md5hex(str){
