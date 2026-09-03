@@ -50,18 +50,18 @@ body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(-
 .skel-row{display:flex;align-items:center;gap:11px;}
 @media (prefers-reduced-motion:reduce){.skel::after{animation:none}}
 
-.skel-evwrap{padding:calc(var(--safeTop) + 74px) 0 0;}
+.skel-evwrap{padding:0;}
+.skel-toprow{position:fixed;left:0;right:0;top:0;z-index:80;display:flex;align-items:center;gap:10px;margin:0;padding:calc(var(--safeTop) + 10px) 18px 18px;box-sizing:border-box;background:transparent;-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);}
 .skel-ev{position:relative;padding:0 0 16px 20px;}
 .skel-ev:before{content:"";position:absolute;left:4px;top:22px;bottom:0;width:2px;background:var(--line);}
 .skel-ev:last-child:before{display:none;}
 .skel-ev:after{content:"";position:absolute;left:0;top:9px;width:10px;height:10px;border-radius:50%;background:color-mix(in srgb,var(--text) 16%,transparent);}
 .skel-evcard{background:color-mix(in srgb,var(--card) 58%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;padding:14px 16px;}
-.skel-rolerow{display:flex;align-items:center;gap:12px;padding:14px 16px;margin:0 0 10px;background:color-mix(in srgb,var(--card) 58%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;}
 </style></head><body><div id="appBg" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;filter:blur(20px) saturate(160%);"></div><div id="appBgTint" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-color:rgba(16,18,28,.16);"></div>
 <div class="page"><div class="wrap" id="wrap"></div></div>
 <div class="overlay" id="overlay"><div class="overlayMask" id="overlayMask"></div><section class="panel"><div class="panelTop"><span class="panelTitle">选择角色</span><button class="panelClose" type="button" id="panelClose">关闭</button></div><div class="tabs" id="tabs"></div><div class="pickGrid" id="pickGrid"></div><div class="pageRow" id="pageRow"></div></section></div>
 <script>
-var BUILD_ID="20260903084621";
+var BUILD_ID="20260903085842";
 
 function md5hex(str){
   function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
@@ -448,8 +448,7 @@ function closeOverlay(){document.getElementById('overlay').classList.remove('sho
 // ===== 事件时间线（整页）=====
 
 function skelEventsHtml(n){var h='';for(var i=0;i<(n||5);i++){h+='<div class="skel-ev"><div class="skel-evcard"><div class="skel" style="height:16px;width:'+(46+i%3*13)+'%"></div><div class="skel skel-line" style="width:97%;margin-top:9px"></div><div class="skel skel-line" style="width:'+(72+i%4*7)+'%"></div><div class="skel-row" style="margin-top:10px;gap:10px"><div class="skel" style="height:11px;width:88px"></div><div class="skel" style="height:11px;width:46px"></div></div></div></div>'}return h}
-function skelRolesHtml(n){var h='<div class="skel-evwrap">';for(var i=0;i<(n||6);i++){h+='<div class="skel-rolerow"><div class="skel" style="width:38px;height:38px;border-radius:50%;flex:0 0 38px"></div><div style="flex:1;min-width:0"><div class="skel" style="height:16px;width:'+(30+i%3*12)+'%"></div><div class="skel" style="height:11px;width:'+(46+i%4*10)+'%;margin-top:7px"></div></div></div>'}return h+'</div>'}
-function skelPickHtml(n){var h='';for(var i=0;i<(n||8);i++){h+='<div class="pickCell"><div class="skel" style="width:100%;aspect-ratio:1/1;border-radius:14px"></div><div class="skel" style="height:12px;width:64%;margin:8px auto 0"></div></div>'}return h}
+function skelBootHtml(){return '<div class="skel-toprow skel-ph"><div class="skel" style="width:38px;height:38px;border-radius:50%;flex:0 0 38px"></div><div style="flex:1;min-width:0"><div class="skel" style="height:17px;width:38%"></div><div class="skel" style="height:12px;width:56%;margin-top:5px"></div></div><div class="skel" style="height:30px;width:76px;border-radius:999px;flex:0 0 76px"></div></div><div class="skel-evwrap">'+skelEventsHtml(5)+'</div>'}
 function eventsShell(name,pos,avatar){
   var w=wrap();w.innerHTML='';
   var oldTop=document.getElementById('fixedTopRow');if(oldTop)oldTop.remove();
@@ -515,7 +514,7 @@ async function loadMore(){
 
 async function loadRoles(){
   if(!bid){statusView('未获取到 bookId；请从书籍详情页或阅读页启动');debug('SRContext='+JSON.stringify(window.SRContext||{}));return}
-  wrap().innerHTML=skelRolesHtml(6);
+  wrap().innerHTML=skelBootHtml();
   var rolePage=1,rolePageSize=50,all=[],total=0,t='',lastUrl='';
   try{
     while(true){
