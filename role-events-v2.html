@@ -32,8 +32,8 @@
 .tab.on{background:#3478f6;color:#fff}
 .pickGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:60px;align-content:start;gap:10px;flex:0 0 auto;overflow:hidden}.roleCard>span:last-child{min-width:0;display:block;overflow:hidden}
 .pageRow{height:40px;min-height:40px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:2px;margin-top:10px;flex:0 0 40px}
-.pageBtn{border:0;background:var(--card);border:1px solid var(--line);color:var(--text);border-radius:999px;font-size:14px;font-weight:700;padding:8px 14px}
-.pageBtn:disabled{opacity:.38}
+.pageBtn{border:0;background:color-mix(in srgb,var(--card) 42%,transparent);border:1px solid color-mix(in srgb,var(--line) 55%,transparent);color:var(--text);border-radius:999px;font-size:14px;font-weight:700;padding:8px 14px;-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%);box-shadow:0 1px 4px rgba(0,0,0,.05);transition:opacity .18s ease,background-color .18s ease}.pageBtn:active:not(:disabled){opacity:.6}
+.pageBtn:disabled{opacity:.3;background:color-mix(in srgb,var(--card) 24%,transparent);box-shadow:none}
 .pageInfo{font-size:13px;color:var(--sub)}
 .debug{display:none;font:12px ui-monospace,monospace;white-space:pre-wrap;color:#d83a3a;margin-top:14px}
 body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,none);background-size:cover;background-position:center;filter:blur(22px) saturate(170%);opacity:.5;z-index:0;pointer-events:none;}.page{position:relative;z-index:1;}.wrap,.page>.wrap{position:relative;z-index:1;}
@@ -61,7 +61,7 @@ body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(-
 <div class="page"><div class="wrap" id="wrap"></div></div>
 <div class="overlay" id="overlay"><div class="overlayMask" id="overlayMask"></div><section class="panel"><div class="panelTop"><span class="panelTitle">选择角色</span><button class="panelClose" type="button" id="panelClose">关闭</button></div><div class="tabs" id="tabs"></div><div class="pickGrid" id="pickGrid"></div><div class="pageRow" id="pageRow"></div></section></div>
 <script>
-var BUILD_ID="20260903085842";
+var BUILD_ID="20260903091716";
 
 function md5hex(str){
   function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
