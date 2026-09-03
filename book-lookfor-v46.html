@@ -29,8 +29,7 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 .state{flex:1;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:14px;text-align:center;line-height:1.8;padding:20px;}
 /* 列表视图 */
 .panel{position:fixed;inset:0;z-index:100;background:transparent;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;isolation:isolate;-webkit-overflow-scrolling:touch;}.panel:before{content:"";position:fixed;inset:0;background-image:var(--panel-bg,none);background-size:cover;background-position:center;filter:blur(24px) saturate(170%);transform:scale(1.12);opacity:.5;z-index:0;pointer-events:none;}.panel:after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 66%,transparent);z-index:1;pointer-events:none;}.panel>.list{position:relative;z-index:2;}.panel>.book-top{position:sticky;z-index:3;}
-.panel.on{display:flex;}
-.panel.stash{display:none!important;}
+.panel.on{display:flex;}.panel.stash{display:none}
 .book-layer-open .page{visibility:hidden;}
 .book-top{position:sticky;left:0;right:0;top:0;z-index:3;display:grid;grid-template-columns:72px minmax(0,1fr) 72px;align-items:center;gap:4px;margin:0;padding:calc(var(--safeTop) + 10px) 14px 18px;box-sizing:border-box;background:transparent;}.book-top>*{position:relative;z-index:1;}.book-top.is-scrolling{background:rgba(255,255,255,.001);-webkit-backdrop-filter:blur(16px) saturate(180%);backdrop-filter:blur(16px) saturate(180%);}
 .pbtn{appearance:none;border:0;background:transparent;color:var(--primary);font-size:15px;font-weight:700;padding:6px 0;cursor:pointer;justify-self:start;}
@@ -62,7 +61,8 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 .skel-title{height:21px;width:62%;margin:0 0 12px;}
 .skel-row{display:flex;align-items:center;gap:11px;}
 .skel-item{padding:15px 14px;border-bottom:1px solid color-mix(in srgb,var(--line) 55%,transparent);}
-@media (prefers-reduced-motion:reduce){.skel::after{animation:none}}</style></head><body>
+@media (prefers-reduced-motion:reduce){.skel::after{animation:none}}
+</style></head><body>
 <div class="page">
   <div class="top"><h1>本书看点</h1></div>
   <div class="deck" id="deck"><article class="card" id="skelCard"><div class="card-head"><div class="skel" style="width:62px;height:11px;margin:0 0 12px"></div><div class="skel skel-title"></div><div class="skel" style="width:38%;height:11px"></div></div><div class="card-scroll"><div class="skel skel-line" style="width:97%"></div><div class="skel skel-line" style="width:91%"></div><div class="skel skel-line" style="width:94%"></div><div class="skel skel-line" style="width:88%"></div><div class="skel skel-line" style="width:66%"></div></div><div class="card-foot"><div class="skel" style="width:30px;height:30px;border-radius:50%;flex:0 0 30px"></div><div class="skel skel-line" style="flex:1;margin:0"></div></div></article></div>
@@ -70,7 +70,8 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:
 <div class="panel" id="listPanel"><div class="book-top"><button class="pbtn" type="button" data-back="listPanel">‹ 返回</button><span class="ptitle" id="listTitle">全部书单</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="list" id="listBox"></div></div>
 <div class="detail" id="detailPanel"><div class="book-top"><button class="pbtn" type="button" data-back="detailPanel">‹ 返回</button><span class="ptitle">书单详情</span><span class="pbtn" style="visibility:hidden">‹</span></div><div class="detail-scroll" id="detailBox"></div></div>
 <script>
-var BUILD_ID="20260903094146";//20260903081921
+var BUILD_ID="20260903103424";//20260903094146
+//20260903081921
 //20260902222036";//20425";//20424";//14809";//14314";//13951";//13542";//12340";//12306";//11914";//11749";//11657";//11211";//20260901140433";//20260901134829";//20260901133502";//20260901132544";//20260901132051";//20260901131528";//20260901131208";//20260901130856";//20260901130655";//20260901130144";//20260901130046";//20260901125830";//20260901125038";//20260901124812";//20260901124528";//20260901123528";//20260901122021";//20260901121420";//20260901120642";//20260901115256";//20260901114626";//20260901114410";//20260901113959";//20260901113443";//20260901112504";//20260901111638";//20260901111242";//20260901105723";//20260901104102";//20260901101517";//20260901101357";//20260901100329";//20260901095549";//20260901094931";
 
 function md5hex(str){

@@ -15,8 +15,7 @@
 .status{padding:60px 6px;color:var(--sub);font-size:14px;text-align:center;line-height:1.7}
 .event{position:relative;padding:0 0 16px 20px}.event:before{content:"";position:absolute;left:4px;top:22px;bottom:0;width:2px;background:var(--line)}.event:last-child:before{display:none}.event:after{content:"";position:absolute;left:0;top:9px;width:10px;height:10px;border-radius:50%;background:#3478f6}
 .eventCard{background:color-mix(in srgb,var(--card) 58%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
-.eventTitle{font-size:16px;font-weight:750;line-height:1.5}.eventText{font-size:14px;line-height:1.7;color:var(--sub);margin-top:7px;white-space:pre-wrap}.eventMeta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--sub);margin-top:10px}.eventLikes{color:#3478f6;font-weight:650}
-.more{display:none!important}
+.eventTitle{font-size:16px;font-weight:750;line-height:1.5}.eventText{font-size:14px;line-height:1.7;color:var(--sub);margin-top:7px;white-space:pre-wrap}.eventMeta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--sub);margin-top:10px}.eventLikes{color:#3478f6;font-weight:650}.more{display:none}
 .pickBtn{border:0;background:transparent;color:#3478f6;font-size:14px;font-weight:750;padding:8px 12px;border-radius:999px;-webkit-tap-highlight-color:transparent;}.pickBtn:active{opacity:.7}
 .overlay{position:fixed;inset:0;z-index:90;display:none}
 .overlay.show{display:block}
@@ -37,8 +36,7 @@
 body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,none);background-size:cover;background-position:center;filter:blur(22px) saturate(170%);opacity:.5;z-index:0;pointer-events:none;}.wrap,.page>.wrap{position:relative;z-index:1;}
 
 body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,transparent);z-index:0;pointer-events:none;}
-.page{position:relative;z-index:1;}
-.role-picker-open .page,.role-picker-open .topRow{visibility:hidden!important;}
+.page{position:relative;z-index:1;}.role-picker-open .page{visibility:hidden}.role-picker-open .topRow{visibility:hidden}
 
 /* 骨架屏（与本书看点 v84 同款） */
 .skel{position:relative;overflow:hidden;border-radius:8px;background:color-mix(in srgb,var(--text) 9%,transparent);}
@@ -59,7 +57,8 @@ body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(-
 <div class="page"><div class="wrap" id="wrap"></div></div>
 <div class="overlay" id="overlay"><div class="overlayMask" id="overlayMask"></div><section class="panel"><div class="panelTop"><span class="panelTitle">选择角色</span><button class="panelClose" type="button" id="panelClose">关闭</button></div><div class="tabs" id="tabs"></div><div class="pickGrid" id="pickGrid"></div><div class="pageRow" id="pageRow"></div></section></div>
 <script>
-var BUILD_ID="20260903094146";//20260903091716
+var BUILD_ID="20260903103424";//20260903094146
+//20260903091716
 
 
 function md5hex(str){
