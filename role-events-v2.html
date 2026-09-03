@@ -41,10 +41,28 @@ body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,no
 body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 80%,transparent);z-index:0;pointer-events:none;}
 .page{position:relative;z-index:1;}
 .role-picker-open .page,.role-picker-open .topRow{visibility:hidden!important;}
+
+/* 骨架屏（与本书看点 v84 同款） */
+.skel{position:relative;overflow:hidden;border-radius:8px;background:color-mix(in srgb,var(--text) 9%,transparent);}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--text) 8%,transparent),transparent);animation:skelShine 1.25s infinite;}
+@keyframes skelShine{100%{transform:translateX(100%)}}
+.skel-line{height:13px;margin:9px 0;width:100%;}
+.skel-row{display:flex;align-items:center;gap:11px;}
+@media (prefers-reduced-motion:reduce){.skel::after{animation:none}}
+
+.skel-evwrap{padding:calc(var(--safeTop) + 74px) 0 0;}
+.skel-ev{position:relative;padding:0 0 16px 20px;}
+.skel-ev:before{content:"";position:absolute;left:4px;top:22px;bottom:0;width:2px;background:var(--line);}
+.skel-ev:last-child:before{display:none;}
+.skel-ev:after{content:"";position:absolute;left:0;top:9px;width:10px;height:10px;border-radius:50%;background:color-mix(in srgb,var(--text) 16%,transparent);}
+.skel-evcard{background:color-mix(in srgb,var(--card) 58%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;padding:14px 16px;}
+.skel-rolerow{display:flex;align-items:center;gap:12px;padding:14px 16px;margin:0 0 10px;background:color-mix(in srgb,var(--card) 58%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:16px;}
 </style></head><body><div id="appBg" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-size:cover;background-position:center;filter:blur(20px) saturate(160%);"></div><div id="appBgTint" style="position:fixed;left:0;top:0;right:0;bottom:0;z-index:0;pointer-events:none;background-color:rgba(16,18,28,.16);"></div>
 <div class="page"><div class="wrap" id="wrap"></div></div>
 <div class="overlay" id="overlay"><div class="overlayMask" id="overlayMask"></div><section class="panel"><div class="panelTop"><span class="panelTitle">选择角色</span><button class="panelClose" type="button" id="panelClose">关闭</button></div><div class="tabs" id="tabs"></div><div class="pickGrid" id="pickGrid"></div><div class="pageRow" id="pageRow"></div></section></div>
 <script>
+var BUILD_ID="20260903084621";
+
 function md5hex(str){
   function rl(x,c){ return (x<<c)|(x>>>(32-c)); }
   function utf(s){ return unescape(encodeURIComponent(s)); }
@@ -428,6 +446,10 @@ function schedulePickerLayout(){
 function openOverlay(){if(loading||!rolesAll.length)return;if(selected){var cur=rolesAll.filter(function(r){return String(r.RoleName||'')===selected.name})[0];if(cur)pickTab=tabOf(cur)}renderTabs();document.body.classList.add('role-picker-open');document.getElementById('overlay').classList.add('show');renderPickGrid();syncPickerLayout();requestAnimationFrame(syncPickerLayout)}
 function closeOverlay(){document.getElementById('overlay').classList.remove('show');document.body.classList.remove('role-picker-open')}
 // ===== 事件时间线（整页）=====
+
+function skelEventsHtml(n){var h='';for(var i=0;i<(n||5);i++){h+='<div class="skel-ev"><div class="skel-evcard"><div class="skel" style="height:16px;width:'+(46+i%3*13)+'%"></div><div class="skel skel-line" style="width:97%;margin-top:9px"></div><div class="skel skel-line" style="width:'+(72+i%4*7)+'%"></div><div class="skel-row" style="margin-top:10px;gap:10px"><div class="skel" style="height:11px;width:88px"></div><div class="skel" style="height:11px;width:46px"></div></div></div></div>'}return h}
+function skelRolesHtml(n){var h='<div class="skel-evwrap">';for(var i=0;i<(n||6);i++){h+='<div class="skel-rolerow"><div class="skel" style="width:38px;height:38px;border-radius:50%;flex:0 0 38px"></div><div style="flex:1;min-width:0"><div class="skel" style="height:16px;width:'+(30+i%3*12)+'%"></div><div class="skel" style="height:11px;width:'+(46+i%4*10)+'%;margin-top:7px"></div></div></div>'}return h+'</div>'}
+function skelPickHtml(n){var h='';for(var i=0;i<(n||8);i++){h+='<div class="pickCell"><div class="skel" style="width:100%;aspect-ratio:1/1;border-radius:14px"></div><div class="skel" style="height:12px;width:64%;margin:8px auto 0"></div></div>'}return h}
 function eventsShell(name,pos,avatar){
   var w=wrap();w.innerHTML='';
   var oldTop=document.getElementById('fixedTopRow');if(oldTop)oldTop.remove();
@@ -440,7 +462,7 @@ function eventsShell(name,pos,avatar){
   document.getElementById('more').onclick=loadMore;
 }
 function eventState(s){var h=document.getElementById('events');if(h)h.innerHTML='<div class="status">'+esc(s)+'</div>'}
-async function choose(r,avatar){if(loading)return;var name=String(r.RoleName||''),pos=String(r.Position||''),roundedId=String(r.RoleId||'');loading=true;eventsShell(name,pos,avatar);eventState('载入中…');page=0;end=false;try{var exactId=await resolveExactRoleId(roundedId,name);selected={id:exactId,name:name};loading=false;loadMore()}catch(e){loading=false;selected=null;eventState('角色 ID 校正失败');debug(String(e))}}
+async function choose(r,avatar){if(loading)return;var name=String(r.RoleName||''),pos=String(r.Position||''),roundedId=String(r.RoleId||'');loading=true;eventsShell(name,pos,avatar);var eb0=document.getElementById('events');if(eb0)eb0.innerHTML=skelEventsHtml(5);page=0;end=false;try{var exactId=await resolveExactRoleId(roundedId,name);selected={id:exactId,name:name};loading=false;loadMore()}catch(e){loading=false;selected=null;eventState('角色 ID 校正失败');debug(String(e))}}
 function storyList(d){
   // 实测 storiesdetail 的事件数组固定为 Data.StoryInfoList
   if(!d||typeof d!=='object')return[];
@@ -493,7 +515,7 @@ async function loadMore(){
 
 async function loadRoles(){
   if(!bid){statusView('未获取到 bookId；请从书籍详情页或阅读页启动');debug('SRContext='+JSON.stringify(window.SRContext||{}));return}
-  statusView('载入中…');
+  wrap().innerHTML=skelRolesHtml(6);
   var rolePage=1,rolePageSize=50,all=[],total=0,t='',lastUrl='';
   try{
     while(true){
