@@ -22,7 +22,8 @@ body::before{content:"";position:fixed;inset:0;background-image:var(--page-bg,no
 <div class="list" id="list"><div class="skel-item skel-ph"><div class="skel skel-ava"></div><div class="mid"><div class="skel" style="height:17px;width:34%"></div><div class="skel" style="height:13px;width:56%;margin-top:9px"></div></div><div class="skel-side"><div class="skel" style="width:22px;height:22px;border-radius:50%"></div><div class="skel" style="width:26px;height:10px"></div></div></div><div class="skel-item skel-ph"><div class="skel skel-ava"></div><div class="mid"><div class="skel" style="height:17px;width:45%"></div><div class="skel" style="height:13px;width:65%;margin-top:9px"></div></div><div class="skel-side"><div class="skel" style="width:22px;height:22px;border-radius:50%"></div><div class="skel" style="width:26px;height:10px"></div></div></div><div class="skel-item skel-ph"><div class="skel skel-ava"></div><div class="mid"><div class="skel" style="height:17px;width:56%"></div><div class="skel" style="height:13px;width:74%;margin-top:9px"></div></div><div class="skel-side"><div class="skel" style="width:22px;height:22px;border-radius:50%"></div><div class="skel" style="width:26px;height:10px"></div></div></div><div class="skel-item skel-ph"><div class="skel skel-ava"></div><div class="mid"><div class="skel" style="height:17px;width:34%"></div><div class="skel" style="height:13px;width:83%;margin-top:9px"></div></div><div class="skel-side"><div class="skel" style="width:22px;height:22px;border-radius:50%"></div><div class="skel" style="width:26px;height:10px"></div></div></div><div class="skel-item skel-ph"><div class="skel skel-ava"></div><div class="mid"><div class="skel" style="height:17px;width:45%"></div><div class="skel" style="height:13px;width:56%;margin-top:9px"></div></div><div class="skel-side"><div class="skel" style="width:22px;height:22px;border-radius:50%"></div><div class="skel" style="width:26px;height:10px"></div></div></div><div class="skel-item skel-ph"><div class="skel skel-ava"></div><div class="mid"><div class="skel" style="height:17px;width:56%"></div><div class="skel" style="height:13px;width:65%;margin-top:9px"></div></div><div class="skel-side"><div class="skel" style="width:22px;height:22px;border-radius:50%"></div><div class="skel" style="width:26px;height:10px"></div></div></div></div>
 </div></div>
 <script>
-var BUILD_ID="20260903105412";//20260903103424
+var BUILD_ID="20260904104705";//20260903105412
+//20260903103424
 //20260903094146
 //20260903091716
 
@@ -667,6 +668,15 @@ function getBid(){
 
 // ===== 请求 =====
 async function httpText(url, headers){
+  // 优先走 java.ajax 文本通道（url,{"headers":...} 形态，实测 Result=0 签名正确）
+  // -> 返回原始文本，64 位 ID 文本级完整，无需并发猜 ID
+  try{
+    if (window.java && typeof window.java.ajax === 'function'){
+      var u = url + ',{"headers":' + JSON.stringify(headers||{}) + '}';
+      var rr = await window.java.ajax(u);
+      if (typeof rr === 'string' && rr.length > 0 && (rr.charAt(0)==='{' || rr.charAt(0)==='[')) return rr;
+    }
+  }catch(e1){}
   try{
     if (window.SRNative && SRNative.http){
       var r = await SRNative.http(url, headers||null);
@@ -680,7 +690,7 @@ async function httpText(url, headers){
       }
       if (r != null) return String(r);
     }
-  }catch(e1){ return ''; }
+  }catch(e2){ return ''; }
   return '';
 }
 function mkHeaders(arr, ts){
@@ -756,46 +766,20 @@ async function loadMore(){
 
 
 
-// ===== 角色卡：用详情接口验证RoleId候选 =====
+// ===== 角色卡：详情接口直接取（RoleId 文本通道已完整，无并发） =====
 function roleHttps(u){u=String(u||'').trim();return u.indexOf('http://')===0?'https://'+u.slice(7):u;}
-function roleIdCandidates(rounded){
-  var out=[];
-  try{
-    var s=String(rounded||'').trim();
-    var base=BigInt(s);
-    var abs=base<0n?-base:base;
-    var bits=abs.toString(2).length;
-    // IEEE-754 Number在该数量级的步长：2^(指数-52)=2^(bits-53)
-    var radius=bits>53 ? (1n<<BigInt(bits-53)) : 1n;
-    // 覆盖四舍五入、截断等转换；范围随RoleId数量级变化
-    for(var d=-radius;d<=radius;d++)out.push(String(base+d));
-  }catch(e){out.push(String(rounded||''));}
-  return out;
-}
-async function getRoleDetail(bookId,roundedRoleId,expectedName){
+async function getRoleDetail(bookId, roleId, expectedName){
   bookId=String(bookId||'');expectedName=String(expectedName||'');
-  var candidates=roleIdCandidates(roundedRoleId);
-  return await new Promise(function(resolve,reject){
-    var pending=candidates.length,settled=false;
-    if(!pending){reject(new Error('没有RoleId候选'));return;}
-    function failed(){pending--;if(!settled&&pending<=0)reject(new Error('所有RoleId候选均失败'));}
-    candidates.forEach(function(roleId){(async function(){
-      try{
-        var arr=['bookId='+bookId,'roleId='+roleId],ts=Date.now();
-        var url='https://magev6.if.qidian.com/argus/api/v1/bookrole/v2/getroledetails?bookId='+encodeURIComponent(bookId)+'&roleId='+encodeURIComponent(roleId);
-        var txt=await httpText(url,mkHeaders(arr,ts));
-        if(settled)return;
-        var j=JSON.parse(String(txt||'{}')),d=j.Data||{};
-        if(Number(j.Result)!==0||!d.RoleName||expectedName&&String(d.RoleName)!==expectedName){failed();return;}
-        var tags=((d.TagInfo&&d.TagInfo.Items)||[]).map(function(t){return {TagName:t.TagName,Name:t.TagName,Likes:t.Likes};});
-        var dub=d.RoleSpokesManData||null;
-        var result={RoleName:String(d.RoleName||''),RoleId:roleId,__roleId:roleId,Position:String(d.Position||''),RoleDesc:String(d.Description||''),Likes:d.Likes||0,Sex:d.Sex,RoleHeadIcon:roleHttps(d.RoleHeadMap||d.RoleHeadImage||''),RoleBackGroundImage:roleHttps(d.RoleHeadImage||''),TagList:tags,TopDubbing:(dub&&dub.AudioUrl)?{AudioUrl:roleHttps(dub.AudioUrl),AudioTime:0,RefferContent:''}:null};
-        if(!settled){settled=true;resolve(result);}
-      }catch(e){failed();}
-    })();});
-  });
+  var roleIdS=String(roleId==null?'':roleId).trim();
+  var arr=['bookId='+bookId,'roleId='+roleIdS],ts=Date.now();
+  var url='https://magev6.if.qidian.com/argus/api/v1/bookrole/v2/getroledetails?bookId='+encodeURIComponent(bookId)+'&roleId='+encodeURIComponent(roleIdS);
+  var txt=await httpText(url,mkHeaders(arr,ts));
+  var j=JSON.parse(String(txt||'{}')),d=j.Data||{};
+  if(Number(j.Result)!==0||!d.RoleName||expectedName&&String(d.RoleName)!==expectedName) throw new Error('角色详情校验失败 Result='+j.Result);
+  var tags=((d.TagInfo&&d.TagInfo.Items)||[]).map(function(t){return {TagName:t.TagName,Name:t.TagName,Likes:t.Likes};});
+  var dub=d.RoleSpokesManData||null;
+  return {RoleName:String(d.RoleName||''),RoleId:roleIdS,__roleId:roleIdS,Position:String(d.Position||''),RoleDesc:String(d.Description||''),Likes:d.Likes||0,Sex:d.Sex,RoleHeadIcon:roleHttps(d.RoleHeadMap||d.RoleHeadImage||''),RoleBackGroundImage:roleHttps(d.RoleHeadImage||''),TagList:tags,TopDubbing:(dub&&dub.AudioUrl)?{AudioUrl:roleHttps(dub.AudioUrl),AudioTime:0,RefferContent:''}:null};
 }
-
 function roleDataHtml(url){try{return decodeURIComponent(escape(atob(String(url||'').split(',')[1]||'')));}catch(e){return '';}}
 var __roleListHtml='',__roleListClass='',__roleListStyle='',__roleListScroll=0,__roleBusy=false;
 function openRoleCard(url){

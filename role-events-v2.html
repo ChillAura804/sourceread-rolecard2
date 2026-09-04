@@ -57,7 +57,8 @@ body::after{content:"";position:fixed;inset:0;background:color-mix(in srgb,var(-
 <div class="page"><div class="wrap" id="wrap"></div></div>
 <div class="overlay" id="overlay"><div class="overlayMask" id="overlayMask"></div><section class="panel"><div class="panelTop"><span class="panelTitle">选择角色</span><button class="panelClose" type="button" id="panelClose">关闭</button></div><div class="tabs" id="tabs"></div><div class="pickGrid" id="pickGrid"></div><div class="pageRow" id="pageRow"></div></section></div>
 <script>
-var BUILD_ID="20260903103424";//20260903094146
+var BUILD_ID="20260904104705";//20260903103424
+//20260903094146
 //20260903091716
 
 
@@ -356,6 +357,15 @@ function getBid(){
 
 // ===== 请求 =====
 async function httpText(url, headers){
+  // 优先走 java.ajax 文本通道（url,{"headers":...} 形态，实测 Result=0 签名正确）
+  // -> 返回原始文本，64 位 ID 文本级完整，无需并发猜 ID
+  try{
+    if (window.java && typeof window.java.ajax === 'function'){
+      var u = url + ',{"headers":' + JSON.stringify(headers||{}) + '}';
+      var rr = await window.java.ajax(u);
+      if (typeof rr === 'string' && rr.length > 0 && (rr.charAt(0)==='{' || rr.charAt(0)==='[')) return rr;
+    }
+  }catch(e1){}
   try{
     if (window.SRNative && SRNative.http){
       var r = await SRNative.http(url, headers||null);
@@ -369,7 +379,7 @@ async function httpText(url, headers){
       }
       if (r != null) return String(r);
     }
-  }catch(e1){ return ''; }
+  }catch(e2){ return ''; }
   return '';
 }
 function mkHeaders(arr, ts){
@@ -387,8 +397,8 @@ function roleAvatar(r){var im=String(r.RoleHeadIcon||'');return im.indexOf('//')
 function tabOf(r){var p=String(r.Position||'');if(/男主|女主/.test(p))return '主线';if(/男配/.test(p))return '男配';if(/女配/.test(p))return '女配';return '其他'}
 function statusView(s){wrap().innerHTML='<div class="status">'+esc(s)+'</div>'}
 function debug(s){var d=document.createElement('pre');d.className='debug';d.style.display='block';d.textContent=s;wrap().appendChild(d)}
-function roleIdCandidates(rounded){var out=[];try{var base=BigInt(String(rounded||'').trim()),abs=base<0n?-base:base,bits=abs.toString(2).length,radius=bits>53?(1n<<BigInt(bits-53)):1n;for(var d=-radius;d<=radius;d++)out.push(String(base+d))}catch(e){out.push(String(rounded||''))}return out}
-async function resolveExactRoleId(roundedId,expectedName){var candidates=roleIdCandidates(roundedId),pending=candidates.length;return await new Promise(function(resolve,reject){if(!pending){reject(new Error('没有RoleId候选'));return}var settled=false;function failed(){pending--;if(!settled&&pending<=0)reject(new Error('所有RoleId候选均失败'))}candidates.forEach(function(roleId){(async function(){try{var a=['bookId='+bid,'roleId='+roleId],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/bookrole/v2/getroledetails?bookId='+encodeURIComponent(bid)+'&roleId='+encodeURIComponent(roleId),t=await httpText(u,mkHeaders(a,ts));if(settled)return;var j=JSON.parse(String(t||'')),d=j.Data||{};if(Number(j.Result)!==0||String(d.RoleName||'')!==String(expectedName||'')){failed();return}if(!settled){settled=true;resolve(roleId)}}catch(e){failed()}})()})})}
+
+async function resolveExactRoleId(roleId,expectedName){var roleIdS=String(roleId==null?'':roleId).trim();var a=['bookId='+bid,'roleId='+roleIdS],ts=Date.now(),u='https://magev6.if.qidian.com/argus/api/v1/bookrole/v2/getroledetails?bookId='+encodeURIComponent(bid)+'&roleId='+encodeURIComponent(roleIdS),t=await httpText(u,mkHeaders(a,ts));var j=JSON.parse(String(t||'')),d=j.Data||{};if(Number(j.Result)!==0||String(d.RoleName||'')!==String(expectedName||''))throw new Error('角色校正失败 Result='+j.Result);return roleIdS}
 // ===== 选择角色：不滚动的覆盖层（分类 + 分页）=====
 var pickTab='主线',pickPage=0,PICK_PER=6,pickerResizeTimer=0;
 function tabsAvailable(){var order=['主线','男配','女配','其他'],out=[];order.forEach(function(g){var n=rolesAll.filter(function(r){return tabOf(r)===g}).length;if(n)out.push({name:g,count:n})});return out}
